@@ -158,7 +158,7 @@ namespace Antmicro.Renode.Peripherals.I2C
             var result = 0u;
             if(dataToReceive != null && dataToReceive.Any())
             {
-                this.log(LogLevel.Noisy, "Receiving data in DataRead");
+                this.Log(LogLevel.Noisy, "Receiving data in DataRead");
                 result = dataToReceive.Dequeue();
             }
             else
