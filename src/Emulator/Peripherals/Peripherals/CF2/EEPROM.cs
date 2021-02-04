@@ -46,17 +46,9 @@ namespace Antmicro.Renode.Peripherals.CF2
         {
         }
 
-        /*public void Reset()
+        public void Reset()
         {
-            Temperature = 0;
-            Humidity = 0;
-            outputBuffer.Clear();
-        }*/
-
-        public enum Model
-        {
-            SI7021 = 0x15,
-            SI7006 = 0x06
         }
+        
     }
 }
