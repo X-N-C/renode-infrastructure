@@ -39,8 +39,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
         [field: Transient]
         public event Action<ILed, bool> StateChanged;
 
-        public bool State 
-        { 
+        public bool State
+        {
             get => state;
 
             private set
@@ -55,6 +55,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                     state = value;
                     StateChanged?.Invoke(this, state);
                     this.Log(LogLevel.Noisy, "LED state changed to {0}", state);
+                    this.Log(LogLevel.Noisy, "Bonus message :D");
                 }
             }
         }
@@ -65,4 +66,3 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
         private readonly object sync;
     }
 }
-
