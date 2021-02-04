@@ -55,7 +55,6 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                     state = value;
                     StateChanged?.Invoke(this, state);
                     this.Log(LogLevel.Noisy, "LED state changed to {0}", state);
-                    this.Log(LogLevel.Noisy, "Bonus message :D");
                 }
             }
         }
