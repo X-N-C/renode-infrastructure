@@ -176,7 +176,7 @@ namespace Antmicro.Renode.Peripherals.I2C
             //moved from WriteByte
             byteTransferFinished.Value = false;
             Update();
-            this.Log(LogLevel.Noisy, "Entered DataWrite with oldValue {0} and newValue {1}", oldValue, newValue);
+            this.Log(LogLevel.Noisy, "Entered DataWrite with oldValue {0} and newValue {1}. State: {2}", oldValue, newValue, state);
             switch(state)
             {
             case State.AwaitingAddress:
@@ -193,6 +193,7 @@ namespace Antmicro.Renode.Peripherals.I2C
 
                     if(willReadOnSelectedSlave)
                     {
+                        this.Log(LogLevel.Noisy, "Data read from slave: {0}", selectedSlave.Read());
                         dataToReceive = new Queue<byte>(selectedSlave.Read());
                         byteTransferFinished.Value = true;
                     }
