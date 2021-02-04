@@ -18,7 +18,6 @@ namespace Antmicro.Renode.Peripherals.CF2
     {
         public EEPROM()
         {
-            data = {81};
         }
 
         public byte[] Read(int count = 1)
@@ -50,6 +49,6 @@ namespace Antmicro.Renode.Peripherals.CF2
         {
         }
 
-        private byte[] data;
+        private byte[] data = {81};
     }
 }
