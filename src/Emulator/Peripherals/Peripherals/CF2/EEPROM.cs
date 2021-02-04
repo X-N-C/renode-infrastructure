@@ -18,7 +18,7 @@ namespace Antmicro.Renode.Peripherals.CF2
     {
         public EEPROM()
         {
-
+            data = {81};
         }
 
         public byte[] Read(int count = 1)
@@ -27,8 +27,8 @@ namespace Antmicro.Renode.Peripherals.CF2
             //this.Log(LogLevel.Noisy, "Reading {0} bytes from the device (asked for {1} bytes).", result.Length, count);
             //outputBuffer.Clear();
             this.Log(LogLevel.Noisy, "Reading {0} bytes from EEPROM", count);
-            byte[] result = new byte[count];
-            return result;
+            //byte[] result = new byte[count];
+            return data;
         }
 
         public void Write(byte[] data)
@@ -49,6 +49,7 @@ namespace Antmicro.Renode.Peripherals.CF2
         public void Reset()
         {
         }
-        
+
+        private byte[] data;
     }
 }
