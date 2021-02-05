@@ -255,6 +255,7 @@ namespace Antmicro.Renode.Peripherals.DMA
                         parent.streamFinished[streamNo] = true;
                         if(interruptOnComplete)
                         {
+                            parent.Log(LogLevel.Noisy, "Transfer finished on stream {0} channel {1}, interrupting...", streamNo, channel);
                             parent.machine.LocalTimeSource.ExecuteInNearestSyncedState(_ => IRQ.Set());
                         }
                     }
@@ -367,4 +368,3 @@ namespace Antmicro.Renode.Peripherals.DMA
 
     }
 }
-
