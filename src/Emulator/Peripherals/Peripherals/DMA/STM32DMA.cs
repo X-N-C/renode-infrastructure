@@ -226,6 +226,7 @@ namespace Antmicro.Renode.Peripherals.DMA
 
             private void DoTransfer()
             {
+                parent.Log(LogLevel.Noisy, "Starting to transfer over DMA stream {0} channel {1}", streamNo, channel);
                 var sourceAddress = 0u;
                 var destinationAddress = 0u;
                 switch(direction)
