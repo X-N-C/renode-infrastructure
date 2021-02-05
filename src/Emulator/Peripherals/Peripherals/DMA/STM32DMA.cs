@@ -186,7 +186,7 @@ namespace Antmicro.Renode.Peripherals.DMA
 
             public void Write(long offset, uint value)
             {
-                parent.Log(LogLevel.Noisy, "Write called, register {0}, value {1:X}", (Registers)offset, value);
+                parent.Log(LogLevel.Noisy, "Write called, register 0x{0:X}, value 0x{1:X}", offset, value);
                 switch((Registers)offset)
                 {
                 case Registers.Configuration:
@@ -227,7 +227,7 @@ namespace Antmicro.Renode.Peripherals.DMA
 
             private void DoTransfer()
             {
-                parent.Log(LogLevel.Noisy, "Starting to transfer over DMA stream {0} channel {1}", streamNo, channel);
+                parent.Log(LogLevel.Noisy, "Starting to transfer over DMA stream {0} channel {1}, numberOfData {2}", streamNo, channel, numberOfData);
                 var sourceAddress = 0u;
                 var destinationAddress = 0u;
                 switch(direction)
