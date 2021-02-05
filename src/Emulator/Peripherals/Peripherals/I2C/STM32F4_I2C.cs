@@ -177,14 +177,14 @@ namespace Antmicro.Renode.Peripherals.I2C
             //moved from WriteByte
             byteTransferFinished.Value = false;
             Update();
-            this.Log(LogLevel.Noisy, "Entered DataWrite with oldValue {0} and newValue {1}. State: {2}", oldValue, newValue, state);
+            this.Log(LogLevel.Noisy, "Entered DataWrite with oldValue 0x{0:X} and newValue 0x{1:X}. State: {2}", oldValue, newValue, state);
             switch(state)
             {
             case State.AwaitingAddress:
                 startBit.Value = false;
                 willReadOnSelectedSlave = (newValue & 1) == 1; //LSB is 1 for read and 0 for write
                 var address = (int)(newValue >> 1);
-                this.Log(LogLevel.Noisy, "Address: {0}", address);
+                this.Log(LogLevel.Noisy, "Address: 0x{0:X}", address);
                 if(ChildCollection.ContainsKey(address))
                 {
                     selectedSlave = ChildCollection[address];
