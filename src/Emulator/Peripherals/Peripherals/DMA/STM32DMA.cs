@@ -186,6 +186,7 @@ namespace Antmicro.Renode.Peripherals.DMA
 
             public void Write(long offset, uint value)
             {
+                parent.Log(LogLevel.Noisy, "Write called, register {0}, value {1:X}", (Registers)offset, value);
                 switch((Registers)offset)
                 {
                 case Registers.Configuration:
