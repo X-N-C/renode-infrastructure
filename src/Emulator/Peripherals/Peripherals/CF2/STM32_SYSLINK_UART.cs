@@ -62,9 +62,10 @@ namespace Antmicro.Renode.Peripherals.CF2
             switch(data[2])
             {
                 case 0x20: // SYSLINK_OW_SCAN
-                    foreach(Byte byte in OwScanData)
+                    //foreach(Byte b in OwScanData) //:(
+                    for(int i = 0; i < 7; ++i)
                     {
-                        CharReceived?.Invoke(byte);
+                        CharReceived?.Invoke(b);
                     }
                     receiveFifo.Clear();
                 default:
