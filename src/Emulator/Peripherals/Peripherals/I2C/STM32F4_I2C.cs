@@ -158,6 +158,7 @@ namespace Antmicro.Renode.Peripherals.I2C
             var result = 0u;
             if(dataToReceive != null && dataToReceive.Any())
             {
+                this.Log(LogLevel.Noisy, "Managed to read from non-empty fifo");
                 result = dataToReceive.Dequeue();
             }
             else
@@ -176,13 +177,14 @@ namespace Antmicro.Renode.Peripherals.I2C
             //moved from WriteByte
             byteTransferFinished.Value = false;
             Update();
-
+            this.Log(LogLevel.Noisy, "Entered DataWrite with oldValue 0x{0:X} and newValue 0x{1:X}. State: {2}", oldValue, newValue, state);
             switch(state)
             {
             case State.AwaitingAddress:
                 startBit.Value = false;
                 willReadOnSelectedSlave = (newValue & 1) == 1; //LSB is 1 for read and 0 for write
                 var address = (int)(newValue >> 1);
+                this.Log(LogLevel.Noisy, "Address: 0x{0:X}", address);
                 if(ChildCollection.ContainsKey(address))
                 {
                     selectedSlave = ChildCollection[address];
@@ -192,6 +194,7 @@ namespace Antmicro.Renode.Peripherals.I2C
 
                     if(willReadOnSelectedSlave)
                     {
+                        this.Log(LogLevel.Noisy, "Data read from slave: {0}", selectedSlave);
                         dataToReceive = new Queue<byte>(selectedSlave.Read());
                         byteTransferFinished.Value = true;
                     }

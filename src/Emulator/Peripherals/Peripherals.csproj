@@ -43,6 +43,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Peripherals\CF2\EEPROM.cs" />
     <Compile Include="Peripherals\Timers\EFR32_RTCC.cs" />
     <Compile Include="Peripherals\Timers\EFR32_Timer.cs" />
     <Compile Include="Peripherals\Timers\LiteX_CPUTimer.cs" />

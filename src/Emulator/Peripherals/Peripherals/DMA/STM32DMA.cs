@@ -186,6 +186,7 @@ namespace Antmicro.Renode.Peripherals.DMA
 
             public void Write(long offset, uint value)
             {
+                parent.Log(LogLevel.Noisy, "Write called, register 0x{0:X}, value 0x{1:X}", offset, value);
                 switch((Registers)offset)
                 {
                 case Registers.Configuration:
@@ -226,6 +227,7 @@ namespace Antmicro.Renode.Peripherals.DMA
 
             private void DoTransfer()
             {
+                parent.Log(LogLevel.Noisy, "Starting to transfer over DMA stream {0} channel {1}, numberOfData {2}", streamNo, channel, numberOfData);
                 var sourceAddress = 0u;
                 var destinationAddress = 0u;
                 switch(direction)
@@ -255,6 +257,7 @@ namespace Antmicro.Renode.Peripherals.DMA
                         parent.streamFinished[streamNo] = true;
                         if(interruptOnComplete)
                         {
+                            parent.Log(LogLevel.Noisy, "Transfer finished on stream {0} channel {1}, interrupting...", streamNo, channel);
                             parent.machine.LocalTimeSource.ExecuteInNearestSyncedState(_ => IRQ.Set());
                         }
                     }
@@ -367,4 +370,3 @@ namespace Antmicro.Renode.Peripherals.DMA
 
     }
 }
-

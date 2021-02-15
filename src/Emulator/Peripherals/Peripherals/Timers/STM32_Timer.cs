@@ -330,4 +330,3 @@ namespace Antmicro.Renode.Peripherals.Timers
         }
     }
 }
-
