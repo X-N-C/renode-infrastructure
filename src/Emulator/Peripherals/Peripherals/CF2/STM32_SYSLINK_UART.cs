@@ -11,6 +11,7 @@ using Antmicro.Renode.Peripherals.Bus;
 using System.Collections.Generic;
 using Antmicro.Migrant;
 using Antmicro.Renode.Core.Structure.Registers;
+using Antmicro.Renode.Peripherals.UART
 
 namespace Antmicro.Renode.Peripherals.CF2
 {
