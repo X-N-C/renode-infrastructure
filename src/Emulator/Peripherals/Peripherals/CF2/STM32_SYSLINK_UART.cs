@@ -22,6 +22,7 @@ namespace Antmicro.Renode.Peripherals.CF2
         {
             this.frequency = frequency;
             DefineRegisters();
+            this.DataLength = UInt32.MaxValue - 6; // Packet lengths have data and 6 extra bytes
         }
 
         public void WriteChar(byte value)
@@ -31,11 +32,37 @@ namespace Antmicro.Renode.Peripherals.CF2
                 this.Log(LogLevel.Warning, "Received a character, but the receiver is not enabled, dropping.");
                 return;
             }*/
+            /*
             receiveFifo.Enqueue(value);
             readFifoNotEmpty.Value = true;
             this.Log(LogLevel.Error, "Data received 0x{0:X}", value);
             Update();
             CharReceived?.Invoke((byte)value);
+            */
+            // Read entire message
+            // With the queue, read byte 2 (0-indexed) to find message type
+            // Handle appropriately when queue has DataLength+6 elements
+            receiveFifo.Enqueue(value);
+            if(receiveFifo.Count == 4)
+            {
+                DataLength = value;
+            }
+            if(receiveFifo.Count == DataLength + 6)
+            {
+                DataLength = UInt32.MaxValue - 6;
+                SendBack();
+            }
+        }
+
+        private uint DataLength;
+
+        private void SendBack()
+        {
+            while(receiveFifo.Count > 0)
+            {
+                CharReceived?.Invoke((byte)receiveFifo.Dequeue());
+            }
+            this.Log(LogLevel.Error, "Complete data sent back!");
         }
 
         public override void Reset()
