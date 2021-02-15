@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using Antmicro.Migrant;
 using Antmicro.Renode.Core.Structure.Registers;
 
-namespace Antmicro.Renode.Peripherals.UART
+namespace Antmicro.Renode.Peripherals.CF2
 {
     [AllowedTranslations(AllowedTranslation.WordToDoubleWord | AllowedTranslation.ByteToDoubleWord)]
     public class STM32_SYSLINK_UART : BasicDoubleWordPeripheral, IUART
