@@ -15,9 +15,9 @@ using Antmicro.Renode.Core.Structure.Registers;
 namespace Antmicro.Renode.Peripherals.UART
 {
     [AllowedTranslations(AllowedTranslation.WordToDoubleWord | AllowedTranslation.ByteToDoubleWord)]
-    public class STM32_UART : BasicDoubleWordPeripheral, IUART
+    public class STM32_SYSLINK_UART : BasicDoubleWordPeripheral, IUART
     {
-        public STM32_UART(Machine machine, uint frequency = 8000000) : base(machine)
+        public STM32_SYSLINK_UART(Machine machine, uint frequency = 8000000) : base(machine)
         {
             this.frequency = frequency;
             DefineRegisters();
