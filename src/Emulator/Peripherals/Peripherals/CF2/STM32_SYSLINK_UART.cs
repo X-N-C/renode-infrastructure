@@ -65,14 +65,16 @@ namespace Antmicro.Renode.Peripherals.CF2
                     //foreach(Byte b in OwScanData) //:(
                     for(int i = 0; i < 7; ++i)
                     {
-                        CharReceived?.Invoke(OwScanData[i]);
+                        CharReceived?.Invoke((byte)OwScanData[i]);
                     }
                     receiveFifo.Clear();
+                    break;
                 default:
                     while(receiveFifo.Count > 0)
                     {
                         CharReceived?.Invoke((byte)receiveFifo.Dequeue());
                     }
+                    break;
             }
 
             this.Log(LogLevel.Error, "Complete data sent back!");
