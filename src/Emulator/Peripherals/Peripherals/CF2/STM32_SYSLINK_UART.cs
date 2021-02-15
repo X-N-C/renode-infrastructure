@@ -58,12 +58,26 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         private void SendBack()
         {
-            while(receiveFifo.Count > 0)
+            Byte[] data = receiveFifo.ToArray();
+            switch(data[2])
             {
-                CharReceived?.Invoke((byte)receiveFifo.Dequeue());
+                case 0x20: // SYSLINK_OW_SCAN
+                    foreach(Byte byte in OwScanData)
+                    {
+                        CharReceived?.Invoke(byte);
+                    }
+                    receiveFifo.Clear();
+                default:
+                    while(receiveFifo.Count > 0)
+                    {
+                        CharReceived?.Invoke((byte)receiveFifo.Dequeue());
+                    }
             }
+
             this.Log(LogLevel.Error, "Complete data sent back!");
         }
+
+        private Byte[] OwScanData = {0xBC,0xCF,0x20,0x01,0x00,0x21,0x62};
 
         public override void Reset()
         {
