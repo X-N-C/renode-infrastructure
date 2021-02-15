@@ -65,7 +65,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                     //foreach(Byte b in OwScanData) //:(
                     for(int i = 0; i < 7; ++i)
                     {
-                        CharReceived?.Invoke(b);
+                        CharReceived?.Invoke(OwScanData[i]);
                     }
                     receiveFifo.Clear();
                 default:
