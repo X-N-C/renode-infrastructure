@@ -33,7 +33,11 @@ namespace Antmicro.Renode.Peripherals.CF2
         public void Write(byte[] data)
         {
 
-         this.Log(LogLevel.Noisy, "Trying to write data {0:X}", data[0]);
+         //this.Log(LogLevel.Noisy, "Trying to write data {0:X}", data[0]);
+         for(int i = 0; i < data.Length; ++i)
+         {
+             this.Log(LogLevel.Noisy, "Trying to write byte {0} (0x{1:X})", i, data[i]);
+         }
             /*this.Log(LogLevel.Noisy, "Received {0} bytes: [{1}]", data.Length, string.Join(", ", data.Select(x => x.ToString())));
             if(!commands.TryGetCommand(data, out var command))
             {
