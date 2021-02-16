@@ -45,6 +45,7 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         public void FinishTransmission()
         {
+           this.Log(LogLevel.Error, "FinishTransmission in EEPROM!");
         }
 
         public void Reset()
