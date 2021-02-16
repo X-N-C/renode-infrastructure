@@ -27,10 +27,7 @@ namespace Antmicro.Renode.Peripherals.CF2
             //outputBuffer.Clear();
             this.Log(LogLevel.Noisy, "Reading 0x{0:X} bytes from EEPROM", count);
             //byte[] result = new byte[count];
-            //return data;
-            byte[] result = new byte[count];
-            result[0] = 0x30;
-            return result;
+            return data;
         }
 
         public void Write(byte[] data)
