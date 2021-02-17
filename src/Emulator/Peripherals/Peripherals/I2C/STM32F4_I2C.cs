@@ -158,7 +158,7 @@ namespace Antmicro.Renode.Peripherals.I2C
             var result = 0u;
             if(dataToReceive != null && dataToReceive.Any())
             {
-                this.Log(LogLevel.Noisy, "Managed to read from non-empty fifo");
+                this.Log(LogLevel.Noisy, "Managed to read 0x{0:X} from non-empty fifo", dataToReceive.Peek());
                 result = dataToReceive.Dequeue();
             }
             else
@@ -184,7 +184,7 @@ namespace Antmicro.Renode.Peripherals.I2C
                 startBit.Value = false;
                 willReadOnSelectedSlave = (newValue & 1) == 1; //LSB is 1 for read and 0 for write
                 var address = (int)(newValue >> 1);
-                this.Log(LogLevel.Noisy, "Address: 0x{0:X}", address);
+                this.Log(LogLevel.Noisy, "Slave device address: 0x{0:X}", address);
                 if(ChildCollection.ContainsKey(address))
                 {
                     selectedSlave = ChildCollection[address];
@@ -194,12 +194,13 @@ namespace Antmicro.Renode.Peripherals.I2C
 
                     if(willReadOnSelectedSlave)
                     {
-                        this.Log(LogLevel.Noisy, "Data read from slave: {0}", selectedSlave);
+                        this.Log(LogLevel.Noisy, "Data will be read from slave: {0}", selectedSlave);
                         dataToReceive = new Queue<byte>(selectedSlave.Read());
                         byteTransferFinished.Value = true;
                     }
                     else
                     {
+                        this.Log(LogLevel.Noisy, "Data written to slave: {0}", selectedSlave);
                         state = State.AwaitingData;
                         dataToTransfer = new List<byte>();
 
@@ -245,6 +246,10 @@ namespace Antmicro.Renode.Peripherals.I2C
             {
                 return;
             }
+            if(dataToTransfer != null)
+            {
+                this.NoisyLog("dataToTransfer has {0} elements", dataToTransfer.Count);
+            }
 
             if(selectedSlave != null && dataToTransfer != null && dataToTransfer.Count > 0)
             {
@@ -262,12 +267,18 @@ namespace Antmicro.Renode.Peripherals.I2C
 
         private void StartWrite(bool oldValue, bool newValue)
         {
+            this.NoisyLog("Setting START bit to {0}", newValue);
             if(!newValue)
             {
                 return;
             }
+            //dataRegisterNotEmpty.Value = false;
 
-            this.NoisyLog("Setting START bit to {0}", newValue);
+            //this.NoisyLog("Setting START bit to {0}", newValue);
+            if(dataToTransfer != null)
+            {
+                this.NoisyLog("dataToTransfer has {0} elements", dataToTransfer.Count);
+            }
             if(selectedSlave != null && dataToTransfer != null && dataToTransfer.Count > 0)
             {
                 // repeated start condition
