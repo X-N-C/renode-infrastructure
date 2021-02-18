@@ -21,14 +21,16 @@ namespace Antmicro.Renode.Peripherals.CF2
             Array.Copy(configdata, storage, configdata.Length);
         }
 
-        public byte[] Read(int count = 1)
+        public byte[] Read(int count)
         {
             //var result = outputBuffer.ToArray();
             //this.Log(LogLevel.Noisy, "Reading {0} bytes from the device (asked for {1} bytes).", result.Length, count);
             //outputBuffer.Clear();
-            this.Log(LogLevel.Noisy, "Reading from EEPROM");
-            //byte[] result = new byte[count];
-            return storage;
+            this.Log(LogLevel.Noisy, "Reading 0x{0:X} bytes from EEPROM",count);
+            byte[] result = {storage[(highAddress<<8)+lowAddress]};
+            lowAddress++;
+            return result;
+            //return storage;
             //return new Byte[1];
         }
 
