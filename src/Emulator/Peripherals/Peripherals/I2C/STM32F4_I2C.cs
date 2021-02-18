@@ -97,8 +97,12 @@ namespace Antmicro.Renode.Peripherals.I2C
 
         private void CreateRegisters()
         {
-            var control1 = new DoubleWordRegister(this).WithFlag(15, writeCallback: SoftwareResetWrite, name:"SWRST").WithFlag(9, FieldMode.Read, name:"StopGen", writeCallback: StopWrite)
-                .WithFlag(8, FieldMode.Read, writeCallback: StartWrite, name:"StartGen").WithFlag(0, writeCallback: PeripheralEnableWrite, name:"PeriEn");
+            var control1 = new DoubleWordRegister(this)
+                .WithFlag(15, writeCallback: SoftwareResetWrite, name:"SWRST")
+                //.WithFlag(11, name:"POS", writeCallback: SetPOS) //Added from issue 114 (Not used in our case?)
+                .WithFlag(9, FieldMode.Read, name:"StopGen", writeCallback: StopWrite)
+                .WithFlag(8, FieldMode.Read, writeCallback: StartWrite, name:"StartGen")
+                .WithFlag(0, writeCallback: PeripheralEnableWrite, name:"PeriEn");
             var control2 = new DoubleWordRegister(this).WithValueField(0, 6, name:"Freq");
             var status1 = new DoubleWordRegister(this);
             var status2 = new DoubleWordRegister(this);
@@ -221,8 +225,13 @@ namespace Antmicro.Renode.Peripherals.I2C
                 machine.LocalTimeSource.ExecuteInNearestSyncedState(_ =>
                 {
                     dataRegisterEmpty.Value = true;
-                    byteTransferFinished.Value = true;
+                    //byteTransferFinished.Value = true;
                     Update();
+                    machine.LocalTimeSource.ExecuteInNearestSyncedState(__ =>
+                    {
+                     byteTransferFinished.Value = true;
+                     Update();
+                    });
                 });
                 break;
             default:
@@ -246,13 +255,10 @@ namespace Antmicro.Renode.Peripherals.I2C
             {
                 return;
             }
-            if(dataToTransfer != null)
-            {
-                this.NoisyLog("dataToTransfer has {0} elements", dataToTransfer.Count);
-            }
 
             if(selectedSlave != null && dataToTransfer != null && dataToTransfer.Count > 0)
             {
+                this.NoisyLog("In StopWrite, dataToTransfer has {0} elements", dataToTransfer.Count);
                 selectedSlave.Write(dataToTransfer.ToArray());
                 dataToTransfer.Clear();
                 state = State.Idle;
@@ -262,6 +268,8 @@ namespace Antmicro.Renode.Peripherals.I2C
             state = State.Idle;
             byteTransferFinished.Value = false;
             dataRegisterEmpty.Value = false;
+            //transmitterReceiver.Value = false;
+            dataToReceive.Clear();
             Update();
         }
 
@@ -272,22 +280,20 @@ namespace Antmicro.Renode.Peripherals.I2C
             {
                 return;
             }
-            //dataRegisterNotEmpty.Value = false;
 
             //this.NoisyLog("Setting START bit to {0}", newValue);
-            if(dataToTransfer != null)
-            {
-                this.NoisyLog("dataToTransfer has {0} elements", dataToTransfer.Count);
-            }
             if(selectedSlave != null && dataToTransfer != null && dataToTransfer.Count > 0)
             {
                 // repeated start condition
+                this.NoisyLog("Repeated start condition. In StartWrite, dataToTransfer has {0} elements", dataToTransfer.Count);
                 selectedSlave.Write(dataToTransfer.ToArray());
                 dataToTransfer.Clear();
+                //transmitterReceiver.Value = false;
             }
             //TODO: TRA cleared on repeated Start condition. Is this always here?
             transmitterReceiver.Value = false;
             dataRegisterEmpty.Value = false;
+            //dataRegisterEmpty.Value = !is2ByteMode; // Added from issue 114 (Not used.)
             byteTransferFinished.Value = false;
             startBit.Value = true;
             if(newValue)
@@ -303,6 +309,28 @@ namespace Antmicro.Renode.Peripherals.I2C
                 }
             }
         }
+
+        // Added from issue #114
+        /*private bool is2ByteMode;
+        private void SetPOS(bool oldValue, bool newValue)
+        {
+            // for 2-byte reception
+            if(newValue)
+            {
+                is2ByteMode = true;
+                //this.Log(LogLevel.Debug, "Now in 2-byte reception mode");
+                if(dataRegisterNotEmpty.Value && dataToReceive.Any())
+                {
+                    byteTransferFinished.Value = true;
+                    //this.Log(LogLevel.Debug, "Waiting for Data Read");
+                }
+            }
+            else
+            {
+                is2ByteMode = false;
+                //this.Log(LogLevel.Debug, "2-byte reception mode off");
+            }
+        }*/
 
         private void PeripheralEnableWrite(bool oldValue, bool newValue)
         {
