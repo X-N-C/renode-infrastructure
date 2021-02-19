@@ -204,7 +204,7 @@ namespace Antmicro.Renode.Peripherals.I2C
                     }
                     else
                     {
-                        this.Log(LogLevel.Noisy, "Data written to slave: {0}", selectedSlave);
+                        this.Log(LogLevel.Noisy, "Data will be written to slave: {0}", selectedSlave);
                         state = State.AwaitingData;
                         dataToTransfer = new List<byte>();
 

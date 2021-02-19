@@ -21,27 +21,26 @@ namespace Antmicro.Renode.Peripherals.CF2
             Array.Copy(configdata, storage, configdata.Length);
         }
 
-        public byte[] Read(int count)
+        public byte[] Read(int count = 1)
         {
             //var result = outputBuffer.ToArray();
             //this.Log(LogLevel.Noisy, "Reading {0} bytes from the device (asked for {1} bytes).", result.Length, count);
             //outputBuffer.Clear();
             this.Log(LogLevel.Noisy, "Reading 0x{0:X} bytes from EEPROM at address 0x{1:X}", count, (highAddress<<8)+lowAddress);
-            byte[] result = {storage[(highAddress<<8)+lowAddress]};
-            lowAddress++;
+            byte[] result = new byte[25];
+            Array.Copy(storage, (highAddress<<8)+lowAddress, result, 0, 25); //TODO Handle out of bounds case
+            lowAddress++; //TODO also increase highAddress
             return result;
-            //return storage;
-            //return new Byte[1];
+            // Implemented: Current, Random and almost Sequential Read
+            // Currently no way to know how many bytes are read and thus
+            // Sequential Read cannot properly increase the address counter
+
         }
 
         public void Write(byte[] packet)
         {
-         // Two first bytes written are addresses first high then low
-         // switch on data length, 2, 3 and more or default (0 and 1 causes error?)
-         // calculate eventual page overflow
-         // copy over input data to storage
-
-         // less than 2 ERROR more than 32 varning
+         // Implemented: Byte and Page Write
+         //TODO Delay, handle the extra byte
             this.Log(LogLevel.Error, "In Write! packet length: {0}", packet.Length);
             if(packet.Length < 2)
             {
@@ -61,7 +60,8 @@ namespace Antmicro.Renode.Peripherals.CF2
             byte inPageAddress = (byte)(lowAddress & 0x1F);
             ushort pageAddress = (ushort)((highAddress << 8) + (lowAddress & 0xE0));
             this.Log(LogLevel.Error, "inPageAddress: 0x{0:X} pageAddress: 0x{1:X}",inPageAddress, pageAddress);
-            for(int i = 0; i < packet.Length - 2; ++i)
+            //TODO The I2C seems to send one packet too much of transmited data, workaround by ignoring the final byte (i.e. -3 instead of -2)?
+            for(int i = 0; i < packet.Length - 3; ++i)
             {
                 storage[pageAddress + (inPageAddress+i)%0x20] = packet[i+2];
                 this.Log(LogLevel.Noisy, "Trying to write data byte {0} (0x{1:X})", i, packet[i+2]);
@@ -73,9 +73,6 @@ namespace Antmicro.Renode.Peripherals.CF2
              // vilken data ska kopieras över?
              // var ska den hamna?
              // är page overflow ett problem?
-             // flytta runt i en buffer
-             // kopiera till storage
-             // delay?
         }
 
         public void FinishTransmission()
