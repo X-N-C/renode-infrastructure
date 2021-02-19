@@ -26,7 +26,7 @@ namespace Antmicro.Renode.Peripherals.CF2
             //var result = outputBuffer.ToArray();
             //this.Log(LogLevel.Noisy, "Reading {0} bytes from the device (asked for {1} bytes).", result.Length, count);
             //outputBuffer.Clear();
-            this.Log(LogLevel.Noisy, "Reading 0x{0:X} bytes from EEPROM",count);
+            this.Log(LogLevel.Noisy, "Reading 0x{0:X} bytes from EEPROM at address 0x{1:X}", count, (highAddress<<8)+lowAddress);
             byte[] result = {storage[(highAddress<<8)+lowAddress]};
             lowAddress++;
             return result;
