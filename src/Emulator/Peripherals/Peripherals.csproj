@@ -43,6 +43,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Peripherals\CF2\STM32_Basic_Timer.cs" />
     <Compile Include="Peripherals\CF2\STM32_SYSLINK_UART.cs" />
     <Compile Include="Peripherals\CF2\EEPROM.cs" />
     <Compile Include="Peripherals\Timers\EFR32_RTCC.cs" />

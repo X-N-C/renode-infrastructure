@@ -11,14 +11,15 @@ using Antmicro.Renode.Core.Structure.Registers;
 using Antmicro.Renode.Peripherals.Bus;
 using Antmicro.Renode.Time;
 using Antmicro.Renode.Logging;
+using Antmicro.Renode.Peripherals.Timers;
 
-namespace Antmicro.Renode.Peripherals.Timers
+namespace Antmicro.Renode.Peripherals.CF2
 {
     // This class does not implement advanced-control timers interrupts
     [AllowedTranslations(AllowedTranslation.ByteToDoubleWord | AllowedTranslation.WordToDoubleWord)]
-    public class STM32_Timer : LimitTimer, IDoubleWordPeripheral
+    public class STM32_Basic_Timer : LimitTimer, IDoubleWordPeripheral
     {
-        public STM32_Timer(Machine machine, long frequency, uint initialLimit) : base(machine.ClockSource, frequency, limit: initialLimit,  direction: Direction.Ascending, enabled: false, autoUpdate: false)
+        public STM32_Basic_Timer(Machine machine, long frequency, uint initialLimit) : base(machine.ClockSource, frequency, limit: initialLimit,  direction: Direction.Ascending, enabled: false, autoUpdate: false)
         {
             IRQ = new GPIO();
             this.initialLimit = initialLimit;
@@ -51,6 +52,7 @@ namespace Antmicro.Renode.Peripherals.Timers
                 {
                     ccTimers[j].Enabled = false;
                     ccInterruptFlag[j] = true;
+                    ccInterruptFlag[j] = false; //Basic timer, clean this peripheral later
                     this.Log(LogLevel.Noisy, "cctimer{0}: Compare IRQ pending", j + 1);
                     UpdateInterrupts();
                 };
@@ -106,7 +108,8 @@ namespace Antmicro.Renode.Peripherals.Timers
                             return updateInterruptFlag;
                         },
                         name: "Update interrupt flag (UIF)")
-                    .WithFlag(1, FieldMode.Read | FieldMode.WriteZeroToClear, writeCallback: (_, val) => ClaimCaptureCompareInterrupt(0, val), valueProviderCallback: _ => ccInterruptFlag[0], name: "Capture/Compare 1 interrupt flag (CC1IF)")
+                    .WithReservedBits(1,31)
+                    /*.WithFlag(1, FieldMode.Read | FieldMode.WriteZeroToClear, writeCallback: (_, val) => ClaimCaptureCompareInterrupt(0, val), valueProviderCallback: _ => ccInterruptFlag[0], name: "Capture/Compare 1 interrupt flag (CC1IF)")
                     .WithFlag(2, FieldMode.Read | FieldMode.WriteZeroToClear, writeCallback: (_, val) => ClaimCaptureCompareInterrupt(1, val), valueProviderCallback: _ => ccInterruptFlag[1], name: "Capture/Compare 2 interrupt flag (CC2IF)")
                     .WithFlag(3, FieldMode.Read | FieldMode.WriteZeroToClear, writeCallback: (_, val) => ClaimCaptureCompareInterrupt(2, val), valueProviderCallback: _ => ccInterruptFlag[2], name: "Capture/Compare 3 interrupt flag (CC3IF)")
                     .WithFlag(4, FieldMode.Read | FieldMode.WriteZeroToClear, writeCallback: (_, val) => ClaimCaptureCompareInterrupt(3, val), valueProviderCallback: _ => ccInterruptFlag[3], name: "Capture/Compare 4 interrupt flag (CC4IF)")
@@ -118,7 +121,7 @@ namespace Antmicro.Renode.Peripherals.Timers
                     .WithValueField(10, 1, FieldMode.WriteZeroToClear, writeCallback: (_, __) => {}, name: "Capture/Compare 2 overcapture flag (CC2OF)")
                     .WithValueField(11, 1, FieldMode.WriteZeroToClear, writeCallback: (_, __) => {}, name: "Capture/Compare 3 overcapture flag (CC3OF)")
                     .WithValueField(12, 1, FieldMode.WriteZeroToClear, writeCallback: (_, __) => {}, name: "Capture/Compare 4 overcapture flag (CC4OF)")
-                    .WithReservedBits(13, 18)
+                    .WithReservedBits(13, 18)*/
                     .WithWriteCallback((_, __) => UpdateInterrupts())
                 },
 
@@ -150,13 +153,14 @@ namespace Antmicro.Renode.Peripherals.Timers
                             }
                         }
                     }, name: "Update generation (UG)")
-                    .WithTag("Capture/compare 1 generation (CC1G)", 1, 1)
+                    /*.WithTag("Capture/compare 1 generation (CC1G)", 1, 1)
                     .WithTag("Capture/compare 2 generation (CC2G)", 2, 1)
                     .WithTag("Capture/compare 3 generation (CC3G)", 3, 1)
                     .WithTag("Capture/compare 4 generation (CC4G)", 4, 1)
                     .WithReservedBits(5, 1)
                     .WithTag("Trigger generation (TG)", 6, 1)
-                    .WithReservedBits(7, 25)
+                    .WithReservedBits(7, 25)*/
+                    .WithReservedBits(1, 31)
                     .WithWriteCallback((_, __) => UpdateInterrupts())
                 },
 
@@ -287,6 +291,8 @@ namespace Antmicro.Renode.Peripherals.Timers
             {
                 value |= ccInterruptFlag[i] & ccTimers[i].EventEnabled;
             }
+            this.Log(LogLevel.Noisy, "UIF {0}, ccF1 {1}, ccF2 {2}, ccF3 {3}, ccF4 {4}", updateInterruptFlag, ccInterruptFlag[0], ccInterruptFlag[1], ccInterruptFlag[2], ccInterruptFlag[3]);
+            this.Log(LogLevel.Noisy, "UIE {0}, ccEE1 {1}, ccEE2 {2}, ccEE3 {3}, ccEE4 {4}", updateInterruptEnable.Value, ccTimers[0].EventEnabled, ccTimers[1].EventEnabled, ccTimers[2].EventEnabled, ccTimers[3].EventEnabled);
 
             IRQ.Set(value);
         }
