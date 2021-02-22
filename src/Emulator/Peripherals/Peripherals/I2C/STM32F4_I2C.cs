@@ -188,7 +188,6 @@ namespace Antmicro.Renode.Peripherals.I2C
                 startBit.Value = false;
                 willReadOnSelectedSlave = (newValue & 1) == 1; //LSB is 1 for read and 0 for write
                 var address = (int)(newValue >> 1);
-                this.Log(LogLevel.Noisy, "Slave device address: 0x{0:X}", address);
                 if(ChildCollection.ContainsKey(address))
                 {
                     selectedSlave = ChildCollection[address];
@@ -198,13 +197,13 @@ namespace Antmicro.Renode.Peripherals.I2C
 
                     if(willReadOnSelectedSlave)
                     {
-                        this.Log(LogLevel.Noisy, "Data will be read from slave: {0}", selectedSlave);
+                        this.Log(LogLevel.Noisy, "Data will be read from slave {0} at address 0x{1:X}", selectedSlave, address);
                         dataToReceive = new Queue<byte>(selectedSlave.Read());
                         byteTransferFinished.Value = true;
                     }
                     else
                     {
-                        this.Log(LogLevel.Noisy, "Data will be written to slave: {0}", selectedSlave);
+                        this.Log(LogLevel.Noisy, "Data will be written to slave {0} at address 0x{1:X}", selectedSlave, address);
                         state = State.AwaitingData;
                         dataToTransfer = new List<byte>();
 
@@ -214,6 +213,7 @@ namespace Antmicro.Renode.Peripherals.I2C
                 }
                 else
                 {
+                    this.Log(LogLevel.Warning, "No slave device on address 0x{0:X}", address);
                     state = State.Idle;
                     acknowledgeFailed.Value = true;
                 }
@@ -282,7 +282,6 @@ namespace Antmicro.Renode.Peripherals.I2C
                 return;
             }
 
-            //this.NoisyLog("Setting START bit to {0}", newValue);
             if(selectedSlave != null && dataToTransfer != null && dataToTransfer.Count > 0)
             {
                 // repeated start condition

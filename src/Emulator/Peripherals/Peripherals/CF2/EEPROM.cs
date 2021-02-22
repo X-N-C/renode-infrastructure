@@ -41,7 +41,6 @@ namespace Antmicro.Renode.Peripherals.CF2
         {
          // Implemented: Byte and Page Write
          //TODO Delay, handle the extra byte
-            this.Log(LogLevel.Error, "In Write! packet length: {0}", packet.Length);
             if(packet.Length < 2)
             {
                 this.Log(LogLevel.Error, "Tried to write less than two bytes, i.e. missing address bytes.");
@@ -59,7 +58,7 @@ namespace Antmicro.Renode.Peripherals.CF2
             lowAddress = packet[1];
             byte inPageAddress = (byte)(lowAddress & 0x1F);
             ushort pageAddress = (ushort)((highAddress << 8) + (lowAddress & 0xE0));
-            this.Log(LogLevel.Error, "inPageAddress: 0x{0:X} pageAddress: 0x{1:X}",inPageAddress, pageAddress);
+            this.Log(LogLevel.Noisy, "inPageAddress: 0x{0:X}, pageAddress: 0x{1:X}, packet length: {2}",inPageAddress, pageAddress, packet.Length);
             //TODO The I2C seems to send one packet too much of transmited data, workaround by ignoring the final byte (i.e. -3 instead of -2)?
             for(int i = 0; i < packet.Length - 3; ++i)
             {
