@@ -229,7 +229,7 @@ namespace Antmicro.Renode.Peripherals.I2C
                     Update();
                     machine.LocalTimeSource.ExecuteInNearestSyncedState(__ =>
                     {
-                     this.Log(LogLevel.Error, "Got byte 0x{0:X}. About to set BTF from {3} to true, with TxE={1} and ITBUFEN={2}.", newValue, dataRegisterEmpty.Value, bufferInterruptEnable.Value, byteTransferFinished.Value);
+                     this.Log(LogLevel.Noisy, "Got byte 0x{0:X}. About to set BTF from {3} to true, with TxE={1} and ITBUFEN={2}.", newValue, dataRegisterEmpty.Value, bufferInterruptEnable.Value, byteTransferFinished.Value);
                      byteTransferFinished.Value = true;
                      Update();
                     });

@@ -32,7 +32,7 @@ namespace Antmicro.Renode.Peripherals.UART
             }
             receiveFifo.Enqueue(value);
             readFifoNotEmpty.Value = true;
-            this.Log(LogLevel.Error, "Data received 0x{0:X}", value);
+            this.Log(LogLevel.Info, "Data received 0x{0:X}", value);
             Update();
         }
 
