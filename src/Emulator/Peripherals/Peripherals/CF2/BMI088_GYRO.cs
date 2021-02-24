@@ -97,6 +97,24 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         private void DefineRegisters()
         {
+            Registers.GyroChipID.Define(this, 0x0F); //RO
+            Registers.RateXLSB.Define(this, 0x02); //RO
+            Registers.RateXMSB.Define(this, 0x03); //RO
+            Registers.RateYMSB.Define(this, 0x04); //RO
+            Registers.RateYLSB.Define(this, 0x05); //RO
+            Registers.RateZLSB.Define(this, 0x06); //RO
+            Registers.RateZMSB.Define(this, 0x07); //RO
+
+
+            Registers.GyroSoftreset.Define(this, 0x00) //WO
+                .WithWriteCallback((_, val) =>
+                {
+                    if(val == resetCommand)
+                    {
+                        Reset();
+                    }
+                });
+         /*
             Registers.CoefficientCalibrationAA.Define(this, 0x1B); //RO
             Registers.CoefficientCalibrationAB.Define(this, 0xCB); //RO
             Registers.CoefficientCalibrationAC.Define(this, 0xFB); //RO
@@ -162,6 +180,7 @@ namespace Antmicro.Renode.Peripherals.CF2
 
             Registers.OutXLSB.Define(this, 0x0)
                 .WithValueField(0, 8, out outXLSB, FieldMode.Read, name: "OUT_XLSB");
+                */
         }
 
         private void RegistersAutoIncrement()
@@ -241,42 +260,38 @@ namespace Antmicro.Renode.Peripherals.CF2
         private const byte resetCommand = 0xB6;
         private const short calibMB = -8711;
 
-        private enum MeasurementModes
-        {
-            Temperature = 0x0E,
-            Pressure    = 0x14,
-        }
-
         private enum Registers
         {
-            CoefficientCalibrationAA = 0xAA, // Read-Only
-            CoefficientCalibrationAB = 0xAB,
-            CoefficientCalibrationAC = 0xAC,
-            CoefficientCalibrationAD = 0xAD,
-            CoefficientCalibrationAE = 0xAE,
-            CoefficientCalibrationAF = 0xAF,
-            CoefficientCalibrationB0 = 0xB0,
-            CoefficientCalibrationB1 = 0xB1,
-            CoefficientCalibrationB2 = 0xB2,
-            CoefficientCalibrationB3 = 0xB3,
-            CoefficientCalibrationB4 = 0xB4,
-            CoefficientCalibrationB5 = 0xB5,
-            CoefficientCalibrationB6 = 0xB6,
-            CoefficientCalibrationB7 = 0xB7,
-            CoefficientCalibrationB8 = 0xB8,
-            CoefficientCalibrationB9 = 0xB9,
-            CoefficientCalibrationBA = 0xBA,
-            CoefficientCalibrationBB = 0xBB,
-            CoefficientCalibrationBC = 0xBC,
-            CoefficientCalibrationBD = 0xBD,
-            CoefficientCalibrationBE = 0xBE,
-            CoefficientCalibrationBF = 0xBF,
-            ChipID = 0xD0, // Read-Only
-            SoftReset = 0xE0, // Write-Only
-            CtrlMeasurement = 0xF4, // Read-Write
-            OutMSB = 0xF6,  // Read-Only
-            OutLSB = 0xF7,  // Read-Only
-            OutXLSB = 0xF8  // Read-Only
+            GyroChipID = 0x00, // Read-Only
+            // 0x01 reserved
+            RateXLSB = 0x02, // Read-Only
+            RateXMSB = 0x03, // Read-Only
+            RateYLSB = 0x04, // Read-Only
+            RateYMSB = 0x05, // Read-Only
+            RateZLSB = 0x06, // Read-Only
+            RateZMSB = 0x07, // Read-Only
+            // 0x08 - 0x09 reserved
+            GyroIntStat1 = 0x0A, // Read-Only
+            // 0x0B - 0x0D reserved
+            FIFOStatus = 0x0E, // Read-Only
+            GyroRange = 0x0F, // Read-Write
+            GyroBandwidth = 0x10, // Read-Write
+            GyroLPM1 = 0x11, // Read-Write
+            // 0x12 - 0x13 reserved
+            GyroSoftreset = 0x14, // Write-Only
+            GyroIntCtrl = 0x15, // Read-Write
+            Int3Int4IOConf = 0x16, // Read-Write
+            // 0x17 reserved
+            Int3Int4IOMap = 0x18, // Read-Write
+            // 0x19 - 0x1D reserved
+            FIFOWmEn = 0x1E, // Read-Write
+            // 0x1F - 0x33 reseved
+            FIFOExtIntS = 0x34, // Read-Write
+            // 0x35 - 0x3B reserved
+            GyroSelfTest = 0x3C,
+            FIFOConfig0 = 0x3D, // Read-Write
+            FIFOConfig1 = 0x3E, // Read-Write
+            FIFOData = 0x3F // Read-Only
         }
     }
 }
