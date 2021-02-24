@@ -77,7 +77,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                     break;
             }
 
-            this.Log(LogLevel.Info, "Complete data sent back!");
+            this.Log(LogLevel.Noisy, "Complete data sent back!");
         }
 
         private Byte[] OwScanData = {0xBC,0xCF,0x20,0x01,0x00,0x21,0x62};
