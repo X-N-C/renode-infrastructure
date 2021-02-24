@@ -183,7 +183,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                 */
         }
 
-        private void RegistersAutoIncrement()
+        /*private void RegistersAutoIncrement()
         {
             if((registerAddress >= Registers.CoefficientCalibrationAA &&
                 registerAddress < Registers.CoefficientCalibrationBF) ||
@@ -192,9 +192,9 @@ namespace Antmicro.Renode.Peripherals.CF2
                 registerAddress = (Registers)((int)registerAddress + 1);
                 this.Log(LogLevel.Noisy, "Auto-incrementing to the next register 0x{0:X} - {0}", registerAddress);
             }
-        }
+        }*/
 
-        private int GetUncompensatedTemperature()
+        /*private int GetUncompensatedTemperature()
         {
             ushort ac5 = (ushort)((coeffCalibB2.Value << 8) + coeffCalibB3.Value);
             ushort ac6 = (ushort)((coeffCalibB4.Value << 8) + coeffCalibB5.Value);
@@ -211,9 +211,9 @@ namespace Antmicro.Renode.Peripherals.CF2
             // X1 = B5-X2
             // X1 = (UT-AC6)*AC5/2^15 => UT = ((2^15X1)/AC5)+AC6 = (2^15(B5-X2)/AC5)+AC6
             return (int)((((b5-x2) << 15)/ac5)+ac6);
-        }
+        }*/
 
-        private void HandleMeasurement()
+       /* private void HandleMeasurement()
         {
             this.Log(LogLevel.Noisy, "HandleMeasurement set {0}", (MeasurementModes)ctrlMeasurement.Value);
             switch((MeasurementModes)ctrlMeasurement.Value)
@@ -235,7 +235,7 @@ namespace Antmicro.Renode.Peripherals.CF2
             // Clear SCO bit (start of conversion)
             startConversion.Value = false;
             this.Log(LogLevel.Noisy, "Conversion is complete");
-        }
+        }*/
 
         private IFlagRegisterField startConversion;
         private IValueRegisterField controlOversampling;
