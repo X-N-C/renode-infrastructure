@@ -57,7 +57,7 @@ namespace Antmicro.Renode.Peripherals.CF2
             }
         }
 
-        public byte[] Read(int count)
+        public byte[] Read(int count=6)
         {
             this.Log(LogLevel.Noisy, "Reading {0} bytes from register {1} (0x{1:X})", count, registerAddress);
             var result = new byte[count];
