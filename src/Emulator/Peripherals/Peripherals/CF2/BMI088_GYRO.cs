@@ -64,7 +64,7 @@ namespace Antmicro.Renode.Peripherals.CF2
             for(var i = 0; i < result.Length; i++)
             {
                 result[i] = RegistersCollection.Read((byte)registerAddress);
-                this.Log(LogLevel.Noisy, "Read value {0} from register {1} (0x{1:X})", result[i], registerAddress);
+                this.Log(LogLevel.Noisy, "Read value 0x{0:X} from register {1} (0x{1:X})", result[i], registerAddress);
                 //RegistersAutoIncrement();
             }
             return result;
