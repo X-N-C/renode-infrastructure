@@ -117,7 +117,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                     }
                 });
             Registers.GyroIntCtrl.Define(this, 0x00)
-                .WithReservedBits(0, 6);
+                .WithReservedBits(0, 6)
                 .WithValueFlag(6, name: "fifo_en")
                 .WithValueFlag(7, name: "data_en");
             Registers.Int3Int4IOConf.Define(this, 0x0F)
@@ -126,7 +126,6 @@ namespace Antmicro.Renode.Peripherals.CF2
                 .WithValueFlag(2, name: "int4_lvl")
                 .WithValueFlag(3, name: "int4_od")
                 .WithReservedBits(4, 4);
-
             Registers.Int3Int4IOMap.Define(this, 0x00)
                 .WithValueFlag(0, name: "int3_data")
                 .WithReservedBits(1, 1)
