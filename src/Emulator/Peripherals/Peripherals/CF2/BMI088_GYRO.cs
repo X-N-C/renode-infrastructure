@@ -74,7 +74,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                 this.Log(LogLevel.Noisy, "Read value 0x{0:X} from register {1} (0x{1:X})", result[i], (Registers)i);
                 //RegistersAutoIncrement();
             }
-            return result.Skip(registerAddress);
+            return result.Skip((int)registerAddress);
         }
 
         public void FinishTransmission()
@@ -190,7 +190,7 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         }
 
-        private void RegistersAutoIncrement()
+        /*private void RegistersAutoIncrement()
         {
             if((registerAddress >= Registers.CoefficientCalibrationAA &&
                 registerAddress < Registers.CoefficientCalibrationBF) ||
@@ -199,7 +199,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                 registerAddress = (Registers)((int)registerAddress + 1);
                 this.Log(LogLevel.Noisy, "Auto-incrementing to the next register 0x{0:X} - {0}", registerAddress);
             }
-        }
+        }*/
 
         /*private int GetUncompensatedTemperature()
         {
