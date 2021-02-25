@@ -46,10 +46,15 @@ namespace Antmicro.Renode.Peripherals.CF2
             {
                 // skip the first byte as it contains register address
                 // Must skip final byte, problem with I2C
-                foreach(var b in data.SkipLast(1))
+                /*foreach(var b in data.Skip(1))
                 {
                     this.Log(LogLevel.Noisy, "Writing 0x{0:X} to register {1} (0x{1:X})", b, registerAddress);
                     RegistersCollection.Write((byte)registerAddress, b);
+                }*/
+                for(i = 1; i < data.Length - 2; i++)
+                {
+                 this.Log(LogLevel.Noisy, "Writing 0x{0:X} to register {1} (0x{1:X})", data[i], registerAddress);
+                 RegistersCollection.Write((byte)registerAddress, data[i]);
                 }
             }
             else
