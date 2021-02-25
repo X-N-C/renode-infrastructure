@@ -45,7 +45,7 @@ namespace Antmicro.Renode.Peripherals.CF2
             if(data.Length > 1)
             {
                 // skip the first byte as it contains register address
-                foreach(var b in data.Skip(1))
+                foreach(var b in data.Skip(1).SkipLast(1))
                 {
                     this.Log(LogLevel.Noisy, "Writing 0x{0:X} to register {1} (0x{1:X})", b, registerAddress);
                     RegistersCollection.Write((byte)registerAddress, b);
