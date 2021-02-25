@@ -107,8 +107,8 @@ namespace Antmicro.Renode.Peripherals.CF2
             Registers.GyroChipID.Define(this, 0x0F); //RO
             Registers.RateXLSB.Define(this, 0x02); //RO
             Registers.RateXMSB.Define(this, 0x03); //RO
-            Registers.RateYMSB.Define(this, 0x04); //RO
-            Registers.RateYLSB.Define(this, 0x05); //RO
+            Registers.RateYLSB.Define(this, 0x04); //RO
+            Registers.RateYMSB.Define(this, 0x05); //RO
             Registers.RateZLSB.Define(this, 0x06); //RO
             Registers.RateZMSB.Define(this, 0x07); //RO
 
