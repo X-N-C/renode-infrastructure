@@ -193,8 +193,8 @@ namespace Antmicro.Renode.Peripherals.CF2
         /*private decimal temperature;
         private const decimal MinTemperature = -40;
         private const decimal MaxTemperature = 85;
-        private const byte resetCommand = 0xB6;
         private const short calibMB = -8711;*/
+        private const byte resetCommand = 0xB6;
 
         private enum Registers
         {
