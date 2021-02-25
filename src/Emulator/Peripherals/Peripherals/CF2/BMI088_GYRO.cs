@@ -60,14 +60,21 @@ namespace Antmicro.Renode.Peripherals.CF2
         public byte[] Read(int count)
         {
             this.Log(LogLevel.Noisy, "Reading {0} bytes from register {1} (0x{1:X})", count, registerAddress);
-            var result = new byte[count];
+            /*var result = new byte[count];
             for(var i = 0; i < result.Length; i++)
             {
                 result[i] = RegistersCollection.Read((byte)registerAddress);
                 this.Log(LogLevel.Noisy, "Read value 0x{0:X} from register {1} (0x{1:X})", result[i], registerAddress);
                 //RegistersAutoIncrement();
+            }*/
+            var result = new byte[0x40];
+            for(var i = 0; i < 0x40; i++)
+            {
+                result[i] = RegistersCollection.Read((byte)i);
+                this.Log(LogLevel.Noisy, "Read value 0x{0:X} from register {1} (0x{1:X})", result[i], (Registers)i);
+                //RegistersAutoIncrement();
             }
-            return result;
+            return result.Skip(registerAddress);
         }
 
         public void FinishTransmission()
@@ -179,11 +186,11 @@ namespace Antmicro.Renode.Peripherals.CF2
                 .WithValueField(0, 8, out outLSB, FieldMode.Read, name: "OUT_LSB");
 
             Registers.OutXLSB.Define(this, 0x0)
-                .WithValueField(0, 8, out outXLSB, FieldMode.Read, name: "OUT_XLSB");
-                */
+                .WithValueField(0, 8, out outXLSB, FieldMode.Read, name: "OUT_XLSB");*/
+
         }
 
-        /*private void RegistersAutoIncrement()
+        private void RegistersAutoIncrement()
         {
             if((registerAddress >= Registers.CoefficientCalibrationAA &&
                 registerAddress < Registers.CoefficientCalibrationBF) ||
@@ -192,7 +199,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                 registerAddress = (Registers)((int)registerAddress + 1);
                 this.Log(LogLevel.Noisy, "Auto-incrementing to the next register 0x{0:X} - {0}", registerAddress);
             }
-        }*/
+        }
 
         /*private int GetUncompensatedTemperature()
         {
