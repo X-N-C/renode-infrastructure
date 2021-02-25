@@ -74,7 +74,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                 this.Log(LogLevel.Noisy, "Read value 0x{0:X} from register {1} (0x{1:X})", result[i], (Registers)i);
                 //RegistersAutoIncrement();
             }
-            return result.Skip((int)registerAddress).toArray();
+            return result.Skip((int)registerAddress).ToArray();
         }
 
         public void FinishTransmission()
