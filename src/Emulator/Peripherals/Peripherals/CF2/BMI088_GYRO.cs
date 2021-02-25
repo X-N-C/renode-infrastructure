@@ -101,11 +101,12 @@ namespace Antmicro.Renode.Peripherals.CF2
             Registers.RateZMSB.Define(this, 0x00); //RO
             Registers.GyroIntStat1.Define(this, 0x00)
                 .WithReservedBits(0, 4)
-                .WithValueFlag(4, name: "fifo_int")
+                .WithFlag(4, name: "fifo_int")
                 .WithReservedBits(5, 2)
-                .WithValueFlag(7, name: "gyro_drdy"); //RO
+                .WithFlag(7, name: "gyro_drdy"); //RO
+            // FIFOSTATUS?
 
-            Registers.GyroRange.Define(this, 0x00, 0); //RW
+            Registers.GyroRange.Define(this, 0x00); //RW
             Registers.GyroBandwidth.Define(this, 0x80); //RW
             Registers.GyroLPM1.Define(this, 0x00); //RW
             Registers.GyroSoftreset.Define(this, 0x00) //WO
@@ -118,22 +119,22 @@ namespace Antmicro.Renode.Peripherals.CF2
                 });
             Registers.GyroIntCtrl.Define(this, 0x00)
                 .WithReservedBits(0, 6)
-                .WithValueFlag(6, name: "fifo_en")
-                .WithValueFlag(7, name: "data_en");
+                .WithFlag(6, name: "fifo_en")
+                .WithFlag(7, name: "data_en");
             Registers.Int3Int4IOConf.Define(this, 0x0F)
-                .WithValueFlag(0, name: "int3_lvl")
-                .WithValueFlag(1, name: "int3_od")
-                .WithValueFlag(2, name: "int4_lvl")
-                .WithValueFlag(3, name: "int4_od")
+                .WithFlag(0, name: "int3_lvl")
+                .WithFlag(1, name: "int3_od")
+                .WithFlag(2, name: "int4_lvl")
+                .WithFlag(3, name: "int4_od")
                 .WithReservedBits(4, 4);
             Registers.Int3Int4IOMap.Define(this, 0x00)
-                .WithValueFlag(0, name: "int3_data")
+                .WithFlag(0, name: "int3_data")
                 .WithReservedBits(1, 1)
-                .WithValueFlag(2, name: "int3_fifo")
+                .WithFlag(2, name: "int3_fifo")
                 .WithReservedBits(3, 2)
-                .WithValueFlag(5, name: "int4_fifo")
+                .WithFlag(5, name: "int4_fifo")
                 .WithReservedBits(6, 1)
-                .WithValueFlag(7, name: "int4_data");
+                .WithFlag(7, name: "int4_data");
          /*
 
             Registers.CtrlMeasurement.Define(this, 0x0) //RW
@@ -181,28 +182,19 @@ namespace Antmicro.Renode.Peripherals.CF2
         // One bit: IFlagRegisterField
         // Multiple: IValueRegisterField
 
-        private IFlagRegisterField startConversion;
+        /*private IFlagRegisterField startConversion;
         private IValueRegisterField controlOversampling;
         private IValueRegisterField outMSB;
         private IValueRegisterField outLSB;
         private IValueRegisterField outXLSB;
-        private IValueRegisterField ctrlMeasurement;
+        private IValueRegisterField ctrlMeasurement;*/
         private Registers registerAddress;
 
-        private IValueRegisterField coeffCalibB2;
-        private IValueRegisterField coeffCalibB3;
-        private IValueRegisterField coeffCalibB4;
-        private IValueRegisterField coeffCalibB5;
-        private IValueRegisterField coeffCalibBC;
-        private IValueRegisterField coeffCalibBD;
-        private IValueRegisterField coeffCalibBE;
-        private IValueRegisterField coeffCalibBF;
-
-        private decimal temperature;
+        /*private decimal temperature;
         private const decimal MinTemperature = -40;
         private const decimal MaxTemperature = 85;
         private const byte resetCommand = 0xB6;
-        private const short calibMB = -8711;
+        private const short calibMB = -8711;*/
 
         private enum Registers
         {
