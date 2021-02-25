@@ -59,14 +59,13 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         public byte[] Read(int count)
         {
-            this.Log(LogLevel.Noisy, "Reading {0} bytes from register {1} (0x{1:X})", count, registerAddress);
+            /*this.Log(LogLevel.Noisy, "Reading {0} bytes from register {1} (0x{1:X})", count, registerAddress);
 
-            /*var result = new byte[0x40];
+            var result = new byte[0x40];
             for(var i = 0; i < 0x40; i++)
             {
                 result[i] = RegistersCollection.Read((byte)i);
                 this.Log(LogLevel.Noisy, "Read value 0x{0:X} from register {1} (0x{1:X})", result[i], (Registers)i);
-                //RegistersAutoIncrement();
             }
             return result.Skip((int)registerAddress).ToArray();*/
 
@@ -89,38 +88,26 @@ namespace Antmicro.Renode.Peripherals.CF2
         {
         }
 
-        public decimal Temperature
-        {
-            get => temperature;
-            set
-            {
-                if(value < MinTemperature | value > MaxTemperature)
-                {
-                    this.Log(LogLevel.Warning, "Temperature is out of range. Supported range: {0} - {1}", MinTemperature, MaxTemperature);
-                }
-                else
-                {
-                    temperature = value;
-                    this.Log(LogLevel.Noisy, "Sensor temperature set to {0}", temperature);
-                }
-            }
-        }
-
-        public int UncompensatedPressure { get; set; }
-
         public ByteRegisterCollection RegistersCollection { get; }
 
         private void DefineRegisters()
         {
             Registers.GyroChipID.Define(this, 0x0F); //RO
-            Registers.RateXLSB.Define(this, 0x02); //RO
-            Registers.RateXMSB.Define(this, 0x03); //RO
-            Registers.RateYLSB.Define(this, 0x04); //RO
-            Registers.RateYMSB.Define(this, 0x05); //RO
-            Registers.RateZLSB.Define(this, 0x06); //RO
-            Registers.RateZMSB.Define(this, 0x07); //RO
+            Registers.RateXLSB.Define(this, 0x00); //RO
+            Registers.RateXMSB.Define(this, 0x00); //RO
+            Registers.RateYLSB.Define(this, 0x00); //RO
+            Registers.RateYMSB.Define(this, 0x00); //RO
+            Registers.RateZLSB.Define(this, 0x00); //RO
+            Registers.RateZMSB.Define(this, 0x00); //RO
+            Registers.GyroIntStat1.Define(this, 0x00)
+                .WithReservedBits(0, 4)
+                .WithValueFlag(4, name: "fifo_int")
+                .WithReservedBits(5, 2)
+                .WithValueFlag(7, name: "gyro_drdy"); //RO
 
-
+            Registers.GyroRange.Define(this, 0x00, 0); //RW
+            Registers.GyroBandwidth.Define(this, 0x80); //RW
+            Registers.GyroLPM1.Define(this, 0x00); //RW
             Registers.GyroSoftreset.Define(this, 0x00) //WO
                 .WithWriteCallback((_, val) =>
                 {
@@ -129,57 +116,26 @@ namespace Antmicro.Renode.Peripherals.CF2
                         Reset();
                     }
                 });
+            Registers.GyroIntCtrl.Define(this, 0x00)
+                .WithReservedBits(0, 6);
+                .WithValueFlag(6, name: "fifo_en")
+                .WithValueFlag(7, name: "data_en");
+            Registers.Int3Int4IOConf.Define(this, 0x0F)
+                .WithValueFlag(0, name: "int3_lvl")
+                .WithValueFlag(1, name: "int3_od")
+                .WithValueFlag(2, name: "int4_lvl")
+                .WithValueFlag(3, name: "int4_od")
+                .WithReservedBits(4, 4);
+
+            Registers.Int3Int4IOMap.Define(this, 0x00)
+                .WithValueFlag(0, name: "int3_data")
+                .WithReservedBits(1, 1)
+                .WithValueFlag(2, name: "int3_fifo")
+                .WithReservedBits(3, 2)
+                .WithValueFlag(5, name: "int4_fifo")
+                .WithReservedBits(6, 1)
+                .WithValueFlag(7, name: "int4_data");
          /*
-            Registers.CoefficientCalibrationAA.Define(this, 0x1B); //RO
-            Registers.CoefficientCalibrationAB.Define(this, 0xCB); //RO
-            Registers.CoefficientCalibrationAC.Define(this, 0xFB); //RO
-            Registers.CoefficientCalibrationAD.Define(this, 0xCB); //RO
-            Registers.CoefficientCalibrationAE.Define(this, 0xC6); //RO
-            Registers.CoefficientCalibrationAF.Define(this, 0x91); //RO
-            Registers.CoefficientCalibrationB0.Define(this, 0x7B); //RO
-            Registers.CoefficientCalibrationB1.Define(this, 0xA8); //RO
-
-            Registers.CoefficientCalibrationB2.Define(this, 0x7F)
-                .WithValueField(0, 8, out coeffCalibB2, FieldMode.Read, name: "AC5[15-8]");
-
-            Registers.CoefficientCalibrationB3.Define(this, 0x75)
-                .WithValueField(0, 8, out coeffCalibB3, FieldMode.Read, name: "AC5[7-0]");
-
-            Registers.CoefficientCalibrationB4.Define(this, 0x5A)
-                .WithValueField(0, 8, out coeffCalibB4, FieldMode.Read, name: "AC6[15-8]");
-
-            Registers.CoefficientCalibrationB5.Define(this, 0x71)
-                .WithValueField(0, 8, out coeffCalibB5, FieldMode.Read, name: "AC6[7-0]");
-
-            Registers.CoefficientCalibrationB6.Define(this, 0x15); //RO
-            Registers.CoefficientCalibrationB7.Define(this, 0x7A); //RO
-            Registers.CoefficientCalibrationB8.Define(this, 0x0); //RO
-            Registers.CoefficientCalibrationB9.Define(this, 0x38); //RO
-            Registers.CoefficientCalibrationBA.Define(this, 0x80); //RO
-            Registers.CoefficientCalibrationBB.Define(this, 0x0); //RO
-
-            Registers.CoefficientCalibrationBC.Define(this, unchecked((byte)(calibMB >> 8)))
-                .WithValueField(0, 8, out coeffCalibBC, FieldMode.Read, name: "MC[15-8]");
-
-            Registers.CoefficientCalibrationBD.Define(this, unchecked((byte)calibMB))
-                .WithValueField(0, 8, out coeffCalibBD, FieldMode.Read, name: "MC[7-0]");
-
-            Registers.CoefficientCalibrationBE.Define(this, 0x0B)
-                .WithValueField(0, 8, out coeffCalibBE, FieldMode.Read, name: "MD[15-8]");
-
-            Registers.CoefficientCalibrationBF.Define(this, 0x34)
-                .WithValueField(0, 8, out coeffCalibBF, FieldMode.Read, name: "MD[7-0]");
-
-            Registers.ChipID.Define(this, 0x55); //RO
-
-            Registers.SoftReset.Define(this, 0x0) //WO
-                .WithWriteCallback((_, val) =>
-                {
-                    if(val == resetCommand)
-                    {
-                        Reset();
-                    }
-                });
 
             Registers.CtrlMeasurement.Define(this, 0x0) //RW
                 .WithValueField(0, 5, out ctrlMeasurement , name: "CTRL_MEAS")
@@ -188,7 +144,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                 .WithWriteCallback((_, __) => HandleMeasurement());
 
             Registers.OutMSB.Define(this, 0x80)
-                .WithValueField(0, 8, out outMSB, FieldMode.Read, name: "OUT_MSB");
+                .WithValueField(0, 8, out outMSB,, name: "OUT_MSB");
 
             Registers.OutLSB.Define(this, 0x0)
                 .WithValueField(0, 8, out outLSB, FieldMode.Read, name: "OUT_LSB");
@@ -198,35 +154,6 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         }
 
-        /*private void RegistersAutoIncrement()
-        {
-            if((registerAddress >= Registers.CoefficientCalibrationAA &&
-                registerAddress < Registers.CoefficientCalibrationBF) ||
-               (registerAddress >= Registers.OutMSB && registerAddress < Registers.OutXLSB))
-            {
-                registerAddress = (Registers)((int)registerAddress + 1);
-                this.Log(LogLevel.Noisy, "Auto-incrementing to the next register 0x{0:X} - {0}", registerAddress);
-            }
-        }*/
-
-        /*private int GetUncompensatedTemperature()
-        {
-            ushort ac5 = (ushort)((coeffCalibB2.Value << 8) + coeffCalibB3.Value);
-            ushort ac6 = (ushort)((coeffCalibB4.Value << 8) + coeffCalibB5.Value);
-            short mc = (short)((coeffCalibBC.Value << 8) + coeffCalibBD.Value);
-            short md = (short)((coeffCalibBE.Value << 8) + coeffCalibBF.Value);
-            // T = (B5+8)/2^4 => B5 = 16T-8
-            int b5 = (int)(((uint)(temperature * 10) << 4) - 8);
-            // B5 = X1 + X2 => X1 = B5-X2
-            // X2 = (MC*2^11)/(X1+MD) = (MC*2^11)/(B5-X2+MD)
-            // X2^2+X2(-B5-MD)+2^11MC = 0 => delta = (-B5-MD)^2-2^13MC
-            int delta = (int)(Math.Pow(-b5 - md, 2) - (mc << 13));
-            // X2 = (-(-B5-MD)+sqrt(delta))/2 = (B5+MD)+sqrt(delta))/2
-            int x2 = (int)((int)(b5 + md + Math.Sqrt(delta)) >> 1);
-            // X1 = B5-X2
-            // X1 = (UT-AC6)*AC5/2^15 => UT = ((2^15X1)/AC5)+AC6 = (2^15(B5-X2)/AC5)+AC6
-            return (int)((((b5-x2) << 15)/ac5)+ac6);
-        }*/
 
        /* private void HandleMeasurement()
         {
@@ -251,6 +178,9 @@ namespace Antmicro.Renode.Peripherals.CF2
             startConversion.Value = false;
             this.Log(LogLevel.Noisy, "Conversion is complete");
         }*/
+
+        // One bit: IFlagRegisterField
+        // Multiple: IValueRegisterField
 
         private IFlagRegisterField startConversion;
         private IValueRegisterField controlOversampling;
