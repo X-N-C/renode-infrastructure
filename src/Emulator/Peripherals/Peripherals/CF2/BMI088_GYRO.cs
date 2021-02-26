@@ -156,7 +156,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                 .WithValueField(0, 8, FieldMode.Read, name: "RATE_Y_LSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Y, false)); //RO
                 //.WithValueField(0, 8, out rateYLSB, name:"RATE_Y_LSB"); //RO
             Registers.RateYMSB.Define(this, 0x00)
-                .WithValueField(0, 8, FieldMode.Read, name: "RATE_Y_MSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Y, false)); //RO
+                .WithValueField(0, 8, FieldMode.Read, name: "RATE_Y_MSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Y, true)); //RO
                 //.WithValueField(0, 8, out rateYMSB, name:"RATE_Y_MSB"); //RO
             Registers.RateZLSB.Define(this, 0x00)
                 .WithValueField(0, 8, FieldMode.Read, name: "RATE_Z_LSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Z, false)); //RO
@@ -217,12 +217,12 @@ namespace Antmicro.Renode.Peripherals.CF2
         // Multiple: IValueRegisterField
 
         private IValueRegisterField gyroRange;
-        private IValueRegisterField rateXLSB;
+        /*private IValueRegisterField rateXLSB;
         private IValueRegisterField rateXMSB;
         private IValueRegisterField rateYLSB;
         private IValueRegisterField rateYMSB;
         private IValueRegisterField rateZLSB;
-        private IValueRegisterField rateZMSB;
+        private IValueRegisterField rateZMSB;*/
 
         private IFlagRegisterField dataEn;
         private IFlagRegisterField fifoEn;
