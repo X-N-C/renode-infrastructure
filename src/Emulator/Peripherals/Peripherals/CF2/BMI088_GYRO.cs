@@ -114,6 +114,7 @@ namespace Antmicro.Renode.Peripherals.CF2
             this.Log(LogLevel.Error, "Interrupts set!");
         }
 
+        //TODO CHECK IF IN VALID RANGE!
         public void FeedGyroSample(decimal x, decimal y, decimal z, uint repeat = 1)
         {
             /*var sample = new Vector3DSample(x, y, z);
@@ -122,12 +123,12 @@ namespace Antmicro.Renode.Peripherals.CF2
             {
                 fifo.FeedSample(sample);
             }*/
-            Registers.RateXLSB.Write(DPStoByte(x, false));
-            Registers.RateXMSB.Write(DPStoByte(x, true));
-            Registers.RateYLSB.Write(DPStoByte(y, false));
-            Registers.RateYMSB.Write(DPStoByte(y, true));
-            Registers.RateZLSB.Write(DPStoByte(z, false));
-            Registers.RateZMSB.Write(DPStoByte(z, true));
+            Registers.RateXLSB.Value = (DPStoByte(x, false));
+            Registers.RateXMSB.Value = (DPStoByte(x, true));
+            Registers.RateYLSB.Value = (DPStoByte(y, false));
+            Registers.RateYMSB.Value = (DPStoByte(y, true));
+            Registers.RateZLSB.Value = (DPStoByte(z, false));
+            Registers.RateZMSB.Value = (DPStoByte(z, true));
             testInterrupt();
         }
 
