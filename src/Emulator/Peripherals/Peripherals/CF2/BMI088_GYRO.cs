@@ -115,7 +115,7 @@ namespace Antmicro.Renode.Peripherals.CF2
         }
 
         //TODO CHECK IF IN VALID RANGE!
-        public void FeedGyroSample(decimal x, decimal y, decimal z, uint repeat = 1)
+        public void FeedGyroSample(decimal x, decimal y, decimal z)
         {
             /*var sample = new Vector3DSample(x, y, z);
 
@@ -142,7 +142,7 @@ namespace Antmicro.Renode.Peripherals.CF2
             Registers.RateYLSB.Define(this, 0x00)
                 .WithValueField(0, 8, out rateYLSB, name:"RateYLSB"); //RO
             Registers.RateYMSB.Define(this, 0x00)
-                .WithValueField(0, 8, out rateZMSB, name:"RateYMSB"); //RO
+                .WithValueField(0, 8, out rateYMSB, name:"RateYMSB"); //RO
             Registers.RateZLSB.Define(this, 0x00)
                 .WithValueField(0, 8, out rateZLSB, name:"RateZLSB"); //RO
             Registers.RateZMSB.Define(this, 0x00)
