@@ -123,13 +123,12 @@ namespace Antmicro.Renode.Peripherals.CF2
             {
                 fifo.FeedSample(sample);
             }*/
-            RateXLSB.Value = (DPStoByte(x, false));
-            Registers.RateXLSB.Value = (DPStoByte(x, false));
-            Registers.RateXMSB.Value = (DPStoByte(x, true));
-            Registers.RateYLSB.Value = (DPStoByte(y, false));
-            Registers.RateYMSB.Value = (DPStoByte(y, true));
-            Registers.RateZLSB.Value = (DPStoByte(z, false));
-            Registers.RateZMSB.Value = (DPStoByte(z, true));
+            rateXLSB.Value = (DPStoByte(x, false));
+            rateXMSB.Value = (DPStoByte(x, true));
+            rateYLSB.Value = (DPStoByte(y, false));
+            rateYMSB.Value = (DPStoByte(y, true));
+            rateZLSB.Value = (DPStoByte(z, false));
+            rateZMSB.Value = (DPStoByte(z, true));
             testInterrupt();
         }
 
