@@ -16,7 +16,7 @@ using Antmicro.Renode.Utilities;
 
 namespace Antmicro.Renode.Peripherals.CF2
 {
-    public class BMI088_GYRO : II2CPeripheral, IProvidesRegisterCollection<ByteRegisterCollection>
+    public class BMI088_GYRO : II2CPeripheral, IProvidesRegisterCollection<ByteRegisterCollection>, ISensor
     {
         public BMI088_GYRO()
         {
