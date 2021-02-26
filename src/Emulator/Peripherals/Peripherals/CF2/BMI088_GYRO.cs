@@ -128,11 +128,11 @@ namespace Antmicro.Renode.Peripherals.CF2
         public void FeedGyroSample(decimal x, decimal y, decimal z)
         {
             var sample = new Vector3DSample(x, y, z);
-
-            for(var i = 0; i < repeat; i++)
+            fifo.FeedSample(sample);
+            /*for(var i = 0; i < repeat; i++)
             {
                 fifo.FeedSample(sample);
-            }
+            }*/
             /*rateXLSB.Value = (DPStoByte(x, false));
             rateXMSB.Value = (DPStoByte(x, true));
             rateYLSB.Value = (DPStoByte(y, false));
