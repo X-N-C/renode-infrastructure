@@ -142,7 +142,7 @@ namespace Antmicro.Renode.Peripherals.CF2
             Registers.RateYLSB.Define(this, 0x00)
                 .WithValueField(0, 8, out rateYLSB, name:"RateYLSB"); //RO
             Registers.RateYMSB.Define(this, 0x00)
-                .WithValueField(0, 8, out gyroZMSB, name:"RateYMSB"); //RO
+                .WithValueField(0, 8, out rateZMSB, name:"RateYMSB"); //RO
             Registers.RateZLSB.Define(this, 0x00)
                 .WithValueField(0, 8, out rateZLSB, name:"RateZLSB"); //RO
             Registers.RateZMSB.Define(this, 0x00)
