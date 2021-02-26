@@ -79,6 +79,7 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         public byte[] Read(int count)
         {
+            // Need a semaphore?
             if(registerAddress==Registers.RateXLSB)
             {
                 fifo.TryDequeueNewSample();
@@ -93,7 +94,6 @@ namespace Antmicro.Renode.Peripherals.CF2
                 //registerAddress = (Registers)((int)registerAddress + 1);
             }
             return result;
-
         }
 
         public void FinishTransmission()

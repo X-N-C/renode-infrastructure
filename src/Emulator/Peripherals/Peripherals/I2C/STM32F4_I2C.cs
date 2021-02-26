@@ -179,7 +179,7 @@ namespace Antmicro.Renode.Peripherals.I2C
         private void DataWrite(uint oldValue, uint newValue)
         {
             //moved from WriteByte
-            writeLock = false;
+            writeLock = true;
             byteTransferFinished.Value = false;
             Update();
             this.Log(LogLevel.Noisy, "Entered DataWrite with oldValue 0x{0:X} and newValue 0x{1:X}. State: {2}", oldValue, newValue, state);
@@ -228,14 +228,15 @@ namespace Antmicro.Renode.Peripherals.I2C
                     dataRegisterEmpty.Value = true;
                     //byteTransferFinished.Value = true;
                     Update();
-                    writeLock = true;
+                    writeLock = false;
                     machine.LocalTimeSource.ExecuteInNearestSyncedState(__ =>
                     {
-                     if(writeLock)
+                     if(!writeLock)
                      {
-                     this.Log(LogLevel.Noisy, "Got byte 0x{0:X}. About to set BTF from {3} to true, with TxE={1} and ITBUFEN={2}.", newValue, dataRegisterEmpty.Value, bufferInterruptEnable.Value, byteTransferFinished.Value);
-                     byteTransferFinished.Value = true;
-                     Update();
+                     //this.Log(LogLevel.Noisy, "Got byte 0x{0:X}. About to set BTF from {3} to true, with TxE={1} and ITBUFEN={2}.", newValue, dataRegisterEmpty.Value, bufferInterruptEnable.Value, byteTransferFinished.Value);
+                         this.Log(LogLevel.Noisy, "Setting BTF to true!");
+                         byteTransferFinished.Value = true;
+                         Update();
                      }
                     });
                 });
