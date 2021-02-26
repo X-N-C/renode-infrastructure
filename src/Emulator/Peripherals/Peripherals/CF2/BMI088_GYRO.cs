@@ -123,6 +123,7 @@ namespace Antmicro.Renode.Peripherals.CF2
             {
                 fifo.FeedSample(sample);
             }*/
+            RateXLSB.Value = (DPStoByte(x, false));
             Registers.RateXLSB.Value = (DPStoByte(x, false));
             Registers.RateXMSB.Value = (DPStoByte(x, true));
             Registers.RateYLSB.Value = (DPStoByte(y, false));
@@ -135,12 +136,18 @@ namespace Antmicro.Renode.Peripherals.CF2
         private void DefineRegisters()
         {
             Registers.GyroChipID.Define(this, 0x0F); //RO
-            Registers.RateXLSB.Define(this, 0x00); //RO
-            Registers.RateXMSB.Define(this, 0x00); //RO
-            Registers.RateYLSB.Define(this, 0x00); //RO
-            Registers.RateYMSB.Define(this, 0x00); //RO
-            Registers.RateZLSB.Define(this, 0x00); //RO
-            Registers.RateZMSB.Define(this, 0x00); //RO
+            Registers.RateXLSB.Define(this, 0x00)
+                .WithValueField(0, 8, out rateXLSB, name:"RateXLSB"); //RO
+            Registers.RateXMSB.Define(this, 0x00)
+                .WithValueField(0, 8, out rateXMSB, name:"RateXMSB"); //RO
+            Registers.RateYLSB.Define(this, 0x00)
+                .WithValueField(0, 8, out rateYLSB, name:"RateYLSB"); //RO
+            Registers.RateYMSB.Define(this, 0x00)
+                .WithValueField(0, 8, out gyroZMSB, name:"RateYMSB"); //RO
+            Registers.RateZLSB.Define(this, 0x00)
+                .WithValueField(0, 8, out rateZLSB, name:"RateZLSB"); //RO
+            Registers.RateZMSB.Define(this, 0x00)
+                .WithValueField(0, 8, out rateZMSB, name:"RateZMSB"); //RO
             Registers.GyroIntStat1.Define(this, 0x00)
                 .WithReservedBits(0, 4)
                 .WithFlag(4, name: "fifo_int")
@@ -191,6 +198,12 @@ namespace Antmicro.Renode.Peripherals.CF2
         // Multiple: IValueRegisterField
 
         private IValueRegisterField gyroRange;
+        private IValueRegisterField rateXLSB;
+        private IValueRegisterField rateXMSB;
+        private IValueRegisterField rateYLSB;
+        private IValueRegisterField rateYMSB;
+        private IValueRegisterField rateZLSB;
+        private IValueRegisterField rateZMSB;
 
         private const ushort IrqAmount = 2;
         private const byte resetCommand = 0xB6;
