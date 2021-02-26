@@ -71,6 +71,12 @@ namespace Antmicro.Renode.Peripherals.CF2
             }
         }
 
+        // Help function
+        public byte ReadRegister(byte offset)
+        {
+            return RegistersCollection.Read(offset);
+        }
+
         public byte[] Read(int count)
         {
             if(registerAddress==Registers.RateXLSB)
@@ -110,17 +116,22 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         public void TriggerDataInterrupt()
         {
-            if(int3Data.Value)
+            if(dataEn.Value)
             {
-                Int3.Set(true);
-                Int3.Set(false);
-                this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 3!");
-            }
-            if(int4Data.Value)
-            {
-                Int4.Set(true);
-                Int4.Set(false);
-                this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 4!");
+                if(int3Data.Value)
+                {
+                    Int3.Set(false);
+                    Int3.Set(true);
+                    Int3.Set(false);
+                    this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 3!");
+                }
+                if(int4Data.Value)
+                {
+                    Int4.Set(false);
+                    Int4.Set(true);
+                    Int4.Set(false);
+                    this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 4!");
+                }
             }
         }
 
