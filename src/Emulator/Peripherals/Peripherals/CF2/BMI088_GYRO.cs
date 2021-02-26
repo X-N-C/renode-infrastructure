@@ -20,6 +20,7 @@ namespace Antmicro.Renode.Peripherals.CF2
     {
         public BMI088_GYRO()
         {
+            fifo = new SensorSamplesFifo<Vector3DSample>();
             RegistersCollection = new ByteRegisterCollection(this);
             Int3 = new GPIO();
             Int4 = new GPIO();
@@ -71,20 +72,12 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         public byte[] Read(int count)
         {
-            /*this.Log(LogLevel.Noisy, "Reading {0} bytes from register {1} (0x{1:X})", count, registerAddress);
-
-            var result = new byte[0x40];
-            for(var i = 0; i < 0x40; i++)
+            if(registerAddress==Registers.RateXLSB)
             {
-                result[i] = RegistersCollection.Read((byte)i);
-                this.Log(LogLevel.Noisy, "Read value 0x{0:X} from register {1} (0x{1:X})", result[i], (Registers)i);
+                fifo.TryDequeueNewSample();
             }
-            return result.Skip((int)registerAddress).ToArray();*/
-
             //if registerAddress = 0x02 (xLSB) return 6 bytes (x,y,z)
             //else return 1 byte i.e. the register
-
-
             var result = new byte[registerAddress==Registers.RateXLSB?6:1];
             for(var i = 0; i < result.Length; i++)
             {
@@ -114,39 +107,63 @@ namespace Antmicro.Renode.Peripherals.CF2
             this.Log(LogLevel.Error, "Interrupts set!");
         }
 
+        public void TriggerDataInterrupt()
+        {
+            if(int3Data.Value)
+            {
+                Int3.Set(true);
+                Int3.Set(false);
+                this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 3!");
+            }
+            if(int4Data.Value)
+            {
+                Int4.Set(true);
+                Int4.Set(false);
+                this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 4!");
+            }
+        }
+
         //TODO CHECK IF IN VALID RANGE!
         public void FeedGyroSample(decimal x, decimal y, decimal z)
         {
-            /*var sample = new Vector3DSample(x, y, z);
+            var sample = new Vector3DSample(x, y, z);
 
             for(var i = 0; i < repeat; i++)
             {
                 fifo.FeedSample(sample);
-            }*/
-            rateXLSB.Value = (DPStoByte(x, false));
+            }
+            /*rateXLSB.Value = (DPStoByte(x, false));
             rateXMSB.Value = (DPStoByte(x, true));
             rateYLSB.Value = (DPStoByte(y, false));
             rateYMSB.Value = (DPStoByte(y, true));
             rateZLSB.Value = (DPStoByte(z, false));
-            rateZMSB.Value = (DPStoByte(z, true));
-            testInterrupt();
+            rateZMSB.Value = (DPStoByte(z, true));*/
+            //Int3.Set(true);
+            //Int4.Set(true);
         }
 
         private void DefineRegisters()
         {
             Registers.GyroChipID.Define(this, 0x0F); //RO
             Registers.RateXLSB.Define(this, 0x00)
-                .WithValueField(0, 8, out rateXLSB, name:"RateXLSB"); //RO
+                .WithValueField(0, 8, FieldMode.Read, name: "RATE_X_LSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.X, false)); //RO
+                //.WithValueField(0, 8, out rateXLSB, name:"RATE_X_LSB"); //RO
             Registers.RateXMSB.Define(this, 0x00)
-                .WithValueField(0, 8, out rateXMSB, name:"RateXMSB"); //RO
+                .WithValueField(0, 8, FieldMode.Read, name: "RATE_X_MSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.X, true)); //RO
+                //.WithValueField(0, 8, out rateXMSB, name:"RATE_X_MSB"); //RO
             Registers.RateYLSB.Define(this, 0x00)
-                .WithValueField(0, 8, out rateYLSB, name:"RateYLSB"); //RO
+                .WithValueField(0, 8, FieldMode.Read, name: "RATE_Y_LSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Y, false)); //RO
+                //.WithValueField(0, 8, out rateYLSB, name:"RATE_Y_LSB"); //RO
             Registers.RateYMSB.Define(this, 0x00)
-                .WithValueField(0, 8, out rateYMSB, name:"RateYMSB"); //RO
+                .WithValueField(0, 8, FieldMode.Read, name: "RATE_Y_MSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Y, false)); //RO
+                //.WithValueField(0, 8, out rateYMSB, name:"RATE_Y_MSB"); //RO
             Registers.RateZLSB.Define(this, 0x00)
-                .WithValueField(0, 8, out rateZLSB, name:"RateZLSB"); //RO
+                .WithValueField(0, 8, FieldMode.Read, name: "RATE_Z_LSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Z, false)); //RO
+                //.WithValueField(0, 8, out rateZLSB, name:"RATE_Z_LSB"); //RO
             Registers.RateZMSB.Define(this, 0x00)
-                .WithValueField(0, 8, out rateZMSB, name:"RateZMSB"); //RO
+                .WithValueField(0, 8, FieldMode.Read, name: "RATE_Z_MSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Z, true)); //RO
+                //.WithValueField(0, 8, out rateZMSB, name:"RATE_Z_MSB"); //RO
+
             Registers.GyroIntStat1.Define(this, 0x00)
                 .WithReservedBits(0, 4)
                 .WithFlag(4, name: "fifo_int")
@@ -174,15 +191,15 @@ namespace Antmicro.Renode.Peripherals.CF2
                 .WithFlag(1, name: "int3_od")
                 .WithFlag(2, name: "int4_lvl")
                 .WithFlag(3, name: "int4_od")
-                .WithReservedBits(4, 4);
+                .WithReservedBits(4, 4); // TODO implement?
             Registers.Int3Int4IOMap.Define(this, 0x00)
-                .WithFlag(0, name: "int3_data")
+                .WithFlag(0, out int3Data, name: "int3_data")
                 .WithReservedBits(1, 1)
-                .WithFlag(2, name: "int3_fifo")
+                .WithFlag(2, out int3Fifo, name: "int3_fifo")
                 .WithReservedBits(3, 2)
-                .WithFlag(5, name: "int4_fifo")
+                .WithFlag(5, out int4Fifo, name: "int4_fifo")
                 .WithReservedBits(6, 1)
-                .WithFlag(7, name: "int4_data");
+                .WithFlag(7, out int4Data, name: "int4_data"); // data done
          /*
             Registers.CtrlMeasurement.Define(this, 0x0) //RW
                 .WithValueField(0, 5, out ctrlMeasurement , name: "CTRL_MEAS")
@@ -193,6 +210,8 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         private Registers registerAddress;
         private GPIO[] irqs = new GPIO[IrqAmount];
+        private readonly SensorSamplesFifo<Vector3DSample> fifo;
+
         // One bit: IFlagRegisterField
         // Multiple: IValueRegisterField
 
@@ -203,6 +222,13 @@ namespace Antmicro.Renode.Peripherals.CF2
         private IValueRegisterField rateYMSB;
         private IValueRegisterField rateZLSB;
         private IValueRegisterField rateZMSB;
+
+        private IFlagRegisterField dataEn;
+        private IFlagRegisterField fifoEn;
+        private IFlagRegisterField int3Data;
+        private IFlagRegisterField int3Fifo;
+        private IFlagRegisterField int4Fifo;
+        private IFlagRegisterField int4Data;
 
         private const ushort IrqAmount = 2;
         private const byte resetCommand = 0xB6;
