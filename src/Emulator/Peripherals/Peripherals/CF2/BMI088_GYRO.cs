@@ -107,9 +107,28 @@ namespace Antmicro.Renode.Peripherals.CF2
         //TODO Delete this, implement interrupt test function to be called in Renode
         public void testInterrupt()
         {
+            Int3.Set(false);
+            Int4.Set(false);
             Int3.Set(true);
             Int4.Set(true);
             this.Log(LogLevel.Error, "Interrupts set!");
+        }
+
+        public void FeedGyroSample(decimal x, decimal y, decimal z, uint repeat = 1)
+        {
+            /*var sample = new Vector3DSample(x, y, z);
+
+            for(var i = 0; i < repeat; i++)
+            {
+                fifo.FeedSample(sample);
+            }*/
+            Registers.RateXLSB.Write(DPStoByte(x, false));
+            Registers.RateXMSB.Write(DPStoByte(x, true));
+            Registers.RateYLSB.Write(DPStoByte(y, false));
+            Registers.RateYMSB.Write(DPStoByte(y, true));
+            Registers.RateZLSB.Write(DPStoByte(z, false));
+            Registers.RateZMSB.Write(DPStoByte(z, true));
+            testInterrupt();
         }
 
         private void DefineRegisters()
