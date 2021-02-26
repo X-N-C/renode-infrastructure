@@ -21,6 +21,10 @@ namespace Antmicro.Renode.Peripherals.CF2
         public BMI088_GYRO()
         {
             RegistersCollection = new ByteRegisterCollection(this);
+            Int3 = new GPIO();
+            Int4 = new GPIO();
+            irqs[0] = Int3;
+            irqs[1] = Int4;
             DefineRegisters();
         }
 
@@ -28,6 +32,8 @@ namespace Antmicro.Renode.Peripherals.CF2
         {
             RegistersCollection.Reset();
             registerAddress = 0;
+            Int3.Unset();
+            Int4.Unset();
             this.Log(LogLevel.Noisy, "Reset registers");
         }
 
@@ -95,6 +101,16 @@ namespace Antmicro.Renode.Peripherals.CF2
         }
 
         public ByteRegisterCollection RegistersCollection { get; }
+        public GPIO Int3 { get; }
+        public GPIO Int4 { get; }
+
+        //TODO Delete this, implement interrupt test function to be called in Renode
+        public void testInterrupt()
+        {
+            Int3.Set(true);
+            Int4.Set(true);
+            this.Log(LogLevel.Error, "Interrupts set!");
+        }
 
         private void DefineRegisters()
         {
@@ -111,8 +127,8 @@ namespace Antmicro.Renode.Peripherals.CF2
                 .WithReservedBits(5, 2)
                 .WithFlag(7, name: "gyro_drdy"); //RO
             // FIFOSTATUS?
-
-            Registers.GyroRange.Define(this, 0x00); //RW
+            Registers.GyroRange.Define(this, 0x00)
+                .WithValueField(0, 8, out gyroRange, name:"GYRO_RANGE"); //RW
             Registers.GyroBandwidth.Define(this, 0x80); //RW
             Registers.GyroLPM1.Define(this, 0x00); //RW
             Registers.GyroSoftreset.Define(this, 0x00) //WO
@@ -142,65 +158,29 @@ namespace Antmicro.Renode.Peripherals.CF2
                 .WithReservedBits(6, 1)
                 .WithFlag(7, name: "int4_data");
          /*
-
             Registers.CtrlMeasurement.Define(this, 0x0) //RW
                 .WithValueField(0, 5, out ctrlMeasurement , name: "CTRL_MEAS")
                 .WithFlag(5, out startConversion, name: "SCO")
                 .WithValueField(6, 2, out controlOversampling, name: "OSS")
-                .WithWriteCallback((_, __) => HandleMeasurement());
-
-            Registers.OutMSB.Define(this, 0x80)
-                .WithValueField(0, 8, out outMSB,, name: "OUT_MSB");
-
-            Registers.OutLSB.Define(this, 0x0)
-                .WithValueField(0, 8, out outLSB, FieldMode.Read, name: "OUT_LSB");
-
-            Registers.OutXLSB.Define(this, 0x0)
-                .WithValueField(0, 8, out outXLSB, FieldMode.Read, name: "OUT_XLSB");*/
-
+                .WithWriteCallback((_, __) => HandleMeasurement());*/
         }
 
-
-       /* private void HandleMeasurement()
-        {
-            this.Log(LogLevel.Noisy, "HandleMeasurement set {0}", (MeasurementModes)ctrlMeasurement.Value);
-            switch((MeasurementModes)ctrlMeasurement.Value)
-            {
-                case MeasurementModes.Temperature:
-                    var uncompensatedTemp = GetUncompensatedTemperature();
-                    outMSB.Value = (byte)((uncompensatedTemp >> 8) & 0xFF);
-                    outLSB.Value = (byte)(uncompensatedTemp & 0xFF);
-                    break;
-                case MeasurementModes.Pressure:
-                    var uPressure = UncompensatedPressure << (byte)(8 - controlOversampling.Value);
-                    outMSB.Value = (byte)((uPressure >> 16) & 0xFF);
-                    outLSB.Value = (byte)((uPressure >> 8) & 0xFF);
-                    outXLSB.Value = (byte)(uPressure & 0xFF);
-                    break;
-                default:
-                    break;
-            }
-            // Clear SCO bit (start of conversion)
-            startConversion.Value = false;
-            this.Log(LogLevel.Noisy, "Conversion is complete");
-        }*/
-
+        private Registers registerAddress;
+        private GPIO[] irqs = new GPIO[IrqAmount];
         // One bit: IFlagRegisterField
         // Multiple: IValueRegisterField
 
-        /*private IFlagRegisterField startConversion;
-        private IValueRegisterField controlOversampling;
-        private IValueRegisterField outMSB;
-        private IValueRegisterField outLSB;
-        private IValueRegisterField outXLSB;
-        private IValueRegisterField ctrlMeasurement;*/
-        private Registers registerAddress;
+        private IValueRegisterField gyroRange;
 
-        /*private decimal temperature;
-        private const decimal MinTemperature = -40;
-        private const decimal MaxTemperature = 85;
-        private const short calibMB = -8711;*/
+        private const ushort IrqAmount = 2;
         private const byte resetCommand = 0xB6;
+
+        // short←{⍵×16,384×2*Range}
+        private byte DPStoByte(decimal rawData, bool msb)
+        {
+            short converted = rawData*16.384*(1<<gyroRange);
+            return (byte)(converted >> (msb?8:0));
+        }
 
         private enum Registers
         {
