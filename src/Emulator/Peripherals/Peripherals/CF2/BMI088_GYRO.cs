@@ -178,7 +178,7 @@ namespace Antmicro.Renode.Peripherals.CF2
         // short←{⍵×16,384×2*Range}
         private byte DPStoByte(decimal rawData, bool msb)
         {
-            short converted = (short)(rawData*16.384*(1<<gyroRange.Value));
+            short converted = (short)(rawData*(decimal)16.384*((short)1<<(short)gyroRange.Value));
             return (byte)(converted >> (msb?8:0));
         }
 
