@@ -176,11 +176,11 @@ namespace Antmicro.Renode.Peripherals.CF2
         private const byte resetCommand = 0xB6;
 
         // short←{⍵×16,384×2*Range}
-        private byte DPStoByte(decimal rawData, bool msb)
+        /*private byte DPStoByte(decimal rawData, bool msb)
         {
             short converted = rawData*16.384*(1<<gyroRange);
             return (byte)(converted >> (msb?8:0));
-        }
+        }*/
 
         private enum Registers
         {
