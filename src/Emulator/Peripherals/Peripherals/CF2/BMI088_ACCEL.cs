@@ -73,13 +73,13 @@ namespace Antmicro.Renode.Peripherals.CF2
         public byte[] Read(int count)
         {
             // Need a semaphore?
-            if(registerAddress==Registers.RateXLSB)
+            if(registerAddress==Registers.AccXLSB)
             {
                 fifo.TryDequeueNewSample();
             }
             //if registerAddress = 0x02 (xLSB) return 6 bytes (x,y,z)
             //else return 1 byte i.e. the register
-            var result = new byte[registerAddress==Registers.RateXLSB?6:1];
+            var result = new byte[registerAddress==Registers.AccXLSB?6:1];
             for(var i = 0; i < result.Length; i++)
             {
                 result[i] = RegistersCollection.Read((byte)registerAddress + i);
@@ -180,14 +180,15 @@ namespace Antmicro.Renode.Peripherals.CF2
         //TODO CHECK IF IN VALID RANGE!
         private byte DPStoByte(decimal rawData, bool msb)
         {
-            rawData = rawData*(decimal)16.384*(1<<(short)gyroRange.Value);
+            /*rawData = rawData*(decimal)16.384*(1<<(short)gyroRange.Value);
             short converted = (short)(rawData > Int16.MaxValue ? Int16.MaxValue : rawData < Int16.MinValue ? Int16.MinValue : rawData);
-            return (byte)(converted >> (msb ? 8 : 0));
+            return (byte)(converted >> (msb ? 8 : 0));*/
+            return (byte)0;
         }
 
         private enum Registers
         {
-            AccChipId = 0x00, // Read-Only
+            AccChipID = 0x00, // Read-Only
             // 0x01 reserved
             AccErrReg = 0x02, // Read-Only
             AccStatus = 0x03, // Read-Only
