@@ -167,11 +167,12 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         //private IValueRegisterField gyroRange;
 
-        //private IFlagRegisterField fifoEn;
-        //private IFlagRegisterField int3Data;
-        //private IFlagRegisterField int3Fifo;
-        //private IFlagRegisterField int4Fifo;
-        //private IFlagRegisterField int4Data;
+        private IFlagRegisterField dataEn;
+        private IFlagRegisterField fifoEn;
+        private IFlagRegisterField int3Data;
+        private IFlagRegisterField int3Fifo;
+        private IFlagRegisterField int4Fifo;
+        private IFlagRegisterField int4Data;
 
         private const byte resetCommand = 0xB6;
 
