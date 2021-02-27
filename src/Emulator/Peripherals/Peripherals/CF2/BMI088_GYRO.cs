@@ -25,8 +25,6 @@ namespace Antmicro.Renode.Peripherals.CF2
             RegistersCollection = new ByteRegisterCollection(this);
             Int3 = new GPIO();
             Int4 = new GPIO();
-            irqs[0] = Int3;
-            irqs[1] = Int4;
             DefineRegisters();
         }
 
@@ -189,7 +187,6 @@ namespace Antmicro.Renode.Peripherals.CF2
         }
 
         private Registers registerAddress;
-        private GPIO[] irqs = new GPIO[IrqAmount];
         private readonly SensorSamplesFifo<Vector3DSample> fifo;
 
         // One bit: IFlagRegisterField
@@ -204,7 +201,6 @@ namespace Antmicro.Renode.Peripherals.CF2
         private IFlagRegisterField int4Fifo;
         private IFlagRegisterField int4Data;
 
-        private const ushort IrqAmount = 2;
         private const byte resetCommand = 0xB6;
 
         // short←{⍵×16,384×2*Range}
