@@ -56,6 +56,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                 {
                  this.Log(LogLevel.Noisy, "Writing 0x{0:X} to register {1} (0x{1:X})", data[i], registerAddress);
                  RegistersCollection.Write((byte)registerAddress, data[i]);
+                 registerAddress++;
                 }
             }
             else
@@ -155,8 +156,9 @@ namespace Antmicro.Renode.Peripherals.CF2
                 .WithFlag(7, name: "gyro_drdy"); //RO
             // FIFOSTATUS?
             Registers.GyroRange.Define(this, 0x00)
-                .WithValueField(0, 8, out gyroRange, name:"GYRO_RANGE"); //RW
-            Registers.GyroBandwidth.Define(this, 0x80); //RW //TODO should be used to determine output data rate
+                .WithValueField(0, 8, out gyroRange, name: "gyro_range"); //RW
+            Registers.GyroBandwidth.Define(this, 0x80)
+                .WithValueField(0, 8, name: "gyro_bw"); //RW //TODO should be used to determine output data rate
             Registers.GyroLPM1.Define(this, 0x00); //RW
             Registers.GyroSoftreset.Define(this, 0x00) //WO
                 .WithWriteCallback((_, val) =>

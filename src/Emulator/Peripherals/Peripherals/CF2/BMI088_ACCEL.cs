@@ -54,8 +54,9 @@ namespace Antmicro.Renode.Peripherals.CF2
                 // Must skip final byte, problem with I2C
                 for(var i = 1; i < data.Length - 1; i++)
                 {
-                 this.Log(LogLevel.Noisy, "Writing 0x{0:X} to register {1} (0x{1:X})", data[i], registerAddress);
-                 RegistersCollection.Write((byte)registerAddress, data[i]);
+                    this.Log(LogLevel.Noisy, "Writing 0x{0:X} to register {1} (0x{1:X})", data[i], registerAddress);
+                    RegistersCollection.Write((byte)registerAddress, data[i]);
+                    registerAddress++;
                 }
             }
             else
@@ -147,7 +148,17 @@ namespace Antmicro.Renode.Peripherals.CF2
                 //.WithValueField(0, 8, FieldMode.Read, name: "RATE_Z_LSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Z, false)); //RO
             Registers.AccZMSB.Define(this, 0x00);
                 //.WithValueField(0, 8, FieldMode.Read, name: "RATE_Z_MSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Z, true)); //RO
+            Registers.AccConf.Define(this, 0xA8)
+                .WithValueField(0, 4, name: "acc_odr")
+                .WithValueField(4, 4, name: "acc_bwp"); //RW
+            Registers.AccRange.Define(this, 0x01)
+                .WithValueField(0, 2, name: "acc_range")
+                .WithReservedBits(2, 6); //RW
 
+            Registers.AccPwrConf.Define(this, 0x03)
+                .WithValueField(0, 8, name: "pwr_save_mode"); //RW
+            Registers.AccPwrCtrl.Define(this, 0x00)
+                .WithValueField(0, 8, name: "acc_enable"); //RW
             Registers.AccSoftreset.Define(this, 0x00) //WO
                 .WithWriteCallback((_, val) =>
                 {
