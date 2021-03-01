@@ -97,7 +97,7 @@ namespace Antmicro.Renode.Peripherals.CF2
         public GPIO Int1 { get; }
         public GPIO Int2 { get; }
 
-        public void TriggerDataInterrupt()
+        /*public void TriggerDataInterrupt()
         {
             if(dataEn.Value)
             {
@@ -106,17 +106,17 @@ namespace Antmicro.Renode.Peripherals.CF2
                     Int1.Set(false);
                     Int1.Set(true);
                     Int1.Set(false);
-                    this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 3!");
+                    this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 1!");
                 }
                 if(int4Data.Value)
                 {
                     Int2.Set(false);
                     Int2.Set(true);
                     Int2.Set(false);
-                    this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 4!");
+                    this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 2!");
                 }
             }
-        }
+        }*/
 
         public void FeedAccSample(decimal x, decimal y, decimal z, int repeat = 1)
         {
@@ -136,23 +136,23 @@ namespace Antmicro.Renode.Peripherals.CF2
         private void DefineRegisters()
         {
             Registers.AccChipID.Define(this, 0x1E); //RO
-            Registers.AccXLSB.Define(this, 0x00);
-                //.WithValueField(0, 8, FieldMode.Read, name: "RATE_X_LSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.X, false)); //RO
-            Registers.AccXMSB.Define(this, 0x00);
-                //.WithValueField(0, 8, FieldMode.Read, name: "RATE_X_MSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.X, true)); //RO
-            Registers.AccYLSB.Define(this, 0x00);
-                //.WithValueField(0, 8, FieldMode.Read, name: "RATE_Y_LSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Y, false)); //RO
-            Registers.AccYMSB.Define(this, 0x00);
-                //.WithValueField(0, 8, FieldMode.Read, name: "RATE_Y_MSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Y, true)); //RO
-            Registers.AccZLSB.Define(this, 0x00);
-                //.WithValueField(0, 8, FieldMode.Read, name: "RATE_Z_LSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Z, false)); //RO
-            Registers.AccZMSB.Define(this, 0x00);
-                //.WithValueField(0, 8, FieldMode.Read, name: "RATE_Z_MSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Z, true)); //RO
+            Registers.AccXLSB.Define(this, 0x00)
+                .WithValueField(0, 8, FieldMode.Read, name: "ACC_X_LSB", valueProviderCallback: _ => mgToByte(fifo.Sample.X, false)); //RO
+            Registers.AccXMSB.Define(this, 0x00)
+                .WithValueField(0, 8, FieldMode.Read, name: "ACC_X_MSB", valueProviderCallback: _ => mgToByte(fifo.Sample.X, true)); //RO
+            Registers.AccYLSB.Define(this, 0x00)
+                .WithValueField(0, 8, FieldMode.Read, name: "ACC_Y_LSB", valueProviderCallback: _ => mgToByte(fifo.Sample.Y, false)); //RO
+            Registers.AccYMSB.Define(this, 0x00)
+                .WithValueField(0, 8, FieldMode.Read, name: "ACC_Y_MSB", valueProviderCallback: _ => mgToByte(fifo.Sample.Y, true)); //RO
+            Registers.AccZLSB.Define(this, 0x00)
+                .WithValueField(0, 8, FieldMode.Read, name: "ACC_Z_LSB", valueProviderCallback: _ => mgToByte(fifo.Sample.Z, false)); //RO
+            Registers.AccZMSB.Define(this, 0x00)
+                .WithValueField(0, 8, FieldMode.Read, name: "ACC_Z_MSB", valueProviderCallback: _ => mgToByte(fifo.Sample.Z, true)); //RO
             Registers.AccConf.Define(this, 0xA8)
                 .WithValueField(0, 4, name: "acc_odr")
                 .WithValueField(4, 4, name: "acc_bwp"); //RW
             Registers.AccRange.Define(this, 0x01)
-                .WithValueField(0, 2, name: "acc_range")
+                .WithValueField(0, 2, out accRange, name: "acc_range")
                 .WithReservedBits(2, 6); //RW
 
             Registers.AccPwrConf.Define(this, 0x03)
@@ -176,25 +176,22 @@ namespace Antmicro.Renode.Peripherals.CF2
         // One bit: IFlagRegisterField
         // Multiple: IValueRegisterField
 
-        //private IValueRegisterField gyroRange;
+        private IValueRegisterField accRange;
 
-        private IFlagRegisterField dataEn;
+        /*private IFlagRegisterField dataEn;
         private IFlagRegisterField fifoEn;
         private IFlagRegisterField int3Data;
         private IFlagRegisterField int3Fifo;
         private IFlagRegisterField int4Fifo;
-        private IFlagRegisterField int4Data;
+        private IFlagRegisterField int4Data;*/
 
         private const byte resetCommand = 0xB6;
 
-        // short←{⍵×16,384×2*Range}
-        //TODO CHECK IF IN VALID RANGE!
-        private byte DPStoByte(decimal rawData, bool msb)
+        private byte mgToByte(decimal rawData, bool msb)
         {
-            /*rawData = rawData*(decimal)16.384*(1<<(short)gyroRange.Value);
+            rawData = rawData * 32768 / ((decimal)(1000 * 1.5 * (2 << (short)accRange.Value)));
             short converted = (short)(rawData > Int16.MaxValue ? Int16.MaxValue : rawData < Int16.MinValue ? Int16.MinValue : rawData);
-            return (byte)(converted >> (msb ? 8 : 0));*/
-            return (byte)0;
+            return (byte)(converted >> (msb ? 8 : 0));
         }
 
         private enum Registers
