@@ -21,10 +21,10 @@ namespace Antmicro.Renode.Peripherals.CF2
     {
         public BMP388()
         {
-            fifo = new SensorSamplesFifo<Vector3DSample>();
+            fifoP = new SensorSamplesFifo<ScalarSample>();
+            fifoT = new SensorSamplesFifo<ScalarSample>();
             RegistersCollection = new ByteRegisterCollection(this);
-            Int3 = new GPIO();
-            Int4 = new GPIO();
+            Int1 = new GPIO();
             DefineRegisters();
         }
 
@@ -32,8 +32,7 @@ namespace Antmicro.Renode.Peripherals.CF2
         {
             RegistersCollection.Reset();
             registerAddress = 0;
-            Int3.Unset();
-            Int4.Unset();
+            Int1.Unset();
             this.Log(LogLevel.Noisy, "Reset registers");
         }
 
@@ -50,6 +49,7 @@ namespace Antmicro.Renode.Peripherals.CF2
 
             if(data.Length > 1)
             {
+                // TODO implement burst write capability
                 // skip the first byte as it contains register address
                 // Must skip final byte, problem with I2C
                 for(var i = 1; i < data.Length - 1; i++)
@@ -74,13 +74,13 @@ namespace Antmicro.Renode.Peripherals.CF2
         public byte[] Read(int count)
         {
             // Need a semaphore?
-            if(registerAddress==Registers.RateXLSB)
+            if(registerAddress==Registers.Data0)
             {
-                fifo.TryDequeueNewSample();
+                fifoP.TryDequeueNewSample();
+                fifoT.TryDequeueNewSample();
             }
-            //if registerAddress = 0x02 (xLSB) return 6 bytes (x,y,z)
-            //else return 1 byte i.e. the register
-            var result = new byte[registerAddress==Registers.RateXLSB?6:1];
+
+            var result = new byte[registerAddress==Registers.Data0?6 : registerAddress==Registers.OSR?4 : 1 ];
             for(var i = 0; i < result.Length; i++)
             {
                 result[i] = RegistersCollection.Read((byte)registerAddress + i);
@@ -94,62 +94,55 @@ namespace Antmicro.Renode.Peripherals.CF2
         }
 
         public ByteRegisterCollection RegistersCollection { get; }
-        public GPIO Int3 { get; }
-        public GPIO Int4 { get; }
+        public GPIO Int1 { get; }
 
         public void TriggerDataInterrupt()
         {
-            if(dataEn.Value)
+            if(true) //TODO fix, is data interrupt enabled?
             {
-                if(int3Data.Value)
-                {
-                    Int3.Set(false);
-                    Int3.Set(true);
-                    Int3.Set(false);
-                    this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 3!");
-                }
-                if(int4Data.Value)
-                {
-                    Int4.Set(false);
-                    Int4.Set(true);
-                    Int4.Set(false);
-                    this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 4!");
-                }
+                Int1.Set(false);
+                Int1.Set(true);
+                Int1.Set(false);
+                this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 1!");
             }
         }
 
-        public void FeedGyroSample(decimal x, decimal y, decimal z, int repeat = 1)
+        public void FeedPTSample(decimal pressure, decimal temperature, int repeat = 1)
         {
 
-            var sample = new Vector3DSample(x, y, z);
+            var sampleP = new ScalarSample(pressure);
+            var sampleT = new ScalarSample(temperature);
             for(var i = 0; i < repeat; i++)
             {
-                fifo.FeedSample(sample);
+                fifoP.FeedSample(sampleP);
+                fifoT.FeedSample(sampleT);
             }
         }
 
-        public void FeedGyroSample(string path)
+        public void FeedPTSample(string pathP, string pathT)
         {
-            fifo.FeedSamplesFromFile(path);
+            fifoP.FeedSamplesFromFile(pathP);
+            fifoT.FeedSamplesFromFile(pathT);
         }
 
         private void DefineRegisters()
         {
-            Registers.ChipID.Define(this, 0x50); //RO
+            Registers.ChipId.Define(this, 0x50); //RO
             Registers.ErrReg.Define(this, 0x00); //RO
-            Registers.Status.Define(this, 0x00);
+            Registers.Status.Define(this, 0x10); //RO NOTE wrong reset value, command decoder always ready in simulation?
             Registers.Data0.Define(this, 0x00)
-                .WithValueField(0, 8, FieldMode.Read, name: "Press_[7:0]", valueProviderCallback: _ => DPStoByte(fifo.Sample.X, false)); //RO
+                //.WithValueField(0, 8, FieldMode.Read, name: "Press_[7:0]", valueProviderCallback: _ => DPStoByte(fifo.Sample.X, false)); //RO
+                .WithValueField(0, 8, FieldMode.Read, name: "Press_[7:0]", valueProviderCallback: _ => PtoByte(fifoP.Sample.Value, 0)); //RO
             Registers.Data1.Define(this, 0x00)
-                .WithValueField(0, 8, FieldMode.Read, name: "Press_[15:8]", valueProviderCallback: _ => DPStoByte(fifo.Sample.X, true)); //RO
+                .WithValueField(0, 8, FieldMode.Read, name: "Press_[15:8]", valueProviderCallback: _ => PtoByte(fifoP.Sample.Value, 8)); //RO
             Registers.Data2.Define(this, 0x80)
-                .WithValueField(0, 8, FieldMode.Read, name: "Press_[23:16]", valueProviderCallback: _ => DPStoByte(fifo.Sample.Y, false)); //RO
+                .WithValueField(0, 8, FieldMode.Read, name: "Press_[23:16]", valueProviderCallback: _ => PtoByte(fifoP.Sample.Value, 16)); //RO
             Registers.Data3.Define(this, 0x00)
-                .WithValueField(0, 8, FieldMode.Read, name: "Temp_[7:0]", valueProviderCallback: _ => DPStoByte(fifo.Sample.Y, true)); //RO
+                .WithValueField(0, 8, FieldMode.Read, name: "Temp_[7:0]", valueProviderCallback: _ => TtoByte(fifoT.Sample.Value, 0)); //RO
             Registers.Data4.Define(this, 0x00)
-                .WithValueField(0, 8, FieldMode.Read, name: "Temp_[15:8]", valueProviderCallback: _ => DPStoByte(fifo.Sample.Z, false)); //RO
+                .WithValueField(0, 8, FieldMode.Read, name: "Temp_[15:8]", valueProviderCallback: _ => TtoByte(fifoT.Sample.Value, 8)); //RO
             Registers.Data5.Define(this, 0x80)
-                .WithValueField(0, 8, FieldMode.Read, name: "Temp_[23:16]", valueProviderCallback: _ => DPStoByte(fifo.Sample.Z, true)); //RO
+                .WithValueField(0, 8, FieldMode.Read, name: "Temp_[23:16]", valueProviderCallback: _ => TtoByte(fifoT.Sample.Value, 16)); //RO
 
             Registers.IntCtrl.Define(this, 0x02);
             Registers.IfConf.Define(this, 0x00);
@@ -167,7 +160,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                     }
                 });
 
-           Registers.GyroIntStat1.Define(this, 0x00)
+           /*Registers.GyroIntStat1.Define(this, 0x00)
                 .WithReservedBits(0, 4)
                 .WithFlag(4, name: "fifo_int")
                 .WithReservedBits(5, 2)
@@ -183,13 +176,13 @@ namespace Antmicro.Renode.Peripherals.CF2
                 .WithReservedBits(0, 6)
                 .WithFlag(6, out fifoEn, name: "fifo_en") // Currently unused
                 .WithFlag(7, out dataEn, name: "data_en");
-            Registers.Int3Int4IOConf.Define(this, 0x0F)
+            Registers.Int1Int2IOConf.Define(this, 0x0F)
                 .WithFlag(0, name: "int3_lvl")
                 .WithFlag(1, name: "int3_od")
                 .WithFlag(2, name: "int4_lvl")
                 .WithFlag(3, name: "int4_od")
                 .WithReservedBits(4, 4); // TODO implement?
-            Registers.Int3Int4IOMap.Define(this, 0x00)
+            Registers.Int1Int2IOMap.Define(this, 0x00)
                 .WithFlag(0, out int3Data, name: "int3_data")
                 .WithReservedBits(1, 1)
                 .WithFlag(2, out int3Fifo, name: "int3_fifo")
@@ -197,32 +190,48 @@ namespace Antmicro.Renode.Peripherals.CF2
                 .WithFlag(5, out int4Fifo, name: "int4_fifo")
                 .WithReservedBits(6, 1)
                 .WithFlag(7, out int4Data, name: "int4_data"); // data done
+                */
         }
 
         private Registers registerAddress;
-        private readonly SensorSamplesFifo<Vector3DSample> fifo;
+        private readonly SensorSamplesFifo<ScalarSample> fifoP;
+        private readonly SensorSamplesFifo<ScalarSample> fifoT;
 
         // One bit: IFlagRegisterField
         // Multiple: IValueRegisterField
 
-        private IValueRegisterField gyroRange;
-
+        /*private IValueRegisterField gyroRange;
         private IFlagRegisterField dataEn;
         private IFlagRegisterField fifoEn;
         private IFlagRegisterField int3Data;
         private IFlagRegisterField int3Fifo;
         private IFlagRegisterField int4Fifo;
-        private IFlagRegisterField int4Data;
+        private IFlagRegisterField int4Data;*/
 
         private const byte resetCommand = 0xB6;
 
         // short←{⍵×16,384×2*Range}
         //TODO CHECK IF IN VALID RANGE!
-        private byte DPStoByte(decimal rawData, bool msb)
+
+        /*private byte mgToByte(decimal rawData, bool msb)
         {
-            rawData = rawData*(decimal)16.384*(1<<(short)gyroRange.Value);
-            short converted = (short)(rawData > Int16.MaxValue ? Int16.MaxValue : rawData < Int16.MinValue ? Int16.MinValue : rawData);
+            rawData = rawData * 32768 / ((decimal)(1000 * 1.5 * (2 << (short)accRange.Value)));
+            short converted = (short)(rawData > 6.MaxValue ? 6.MaxValue : rawData < 6.MinValue ? 6.MinValue : rawData);
             return (byte)(converted >> (msb ? 8 : 0));
+        }*/
+
+        private byte PtoByte(decimal rawData, byte shift)
+        {
+            rawData = rawData; //FIXME
+            int converted = (int)(rawData > 0xFFFFFF ? 0xFFFFFF : rawData);
+            return (byte)(converted >> shift);
+        }
+
+        private byte TtoByte(decimal rawData, byte shift)
+        {
+            rawData = rawData; //FIXME
+            int converted = (int)(rawData > 0xFFFFFF ? 0xFFFFFF : rawData);
+            return (byte)(converted >> shift);
         }
 
         private enum Registers
