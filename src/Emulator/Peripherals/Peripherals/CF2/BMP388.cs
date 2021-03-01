@@ -135,21 +135,39 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         private void DefineRegisters()
         {
-            Registers.GyroChipID.Define(this, 0x0F); //RO
-            Registers.RateXLSB.Define(this, 0x00)
-                .WithValueField(0, 8, FieldMode.Read, name: "RATE_X_LSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.X, false)); //RO
-            Registers.RateXMSB.Define(this, 0x00)
-                .WithValueField(0, 8, FieldMode.Read, name: "RATE_X_MSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.X, true)); //RO
-            Registers.RateYLSB.Define(this, 0x00)
-                .WithValueField(0, 8, FieldMode.Read, name: "RATE_Y_LSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Y, false)); //RO
-            Registers.RateYMSB.Define(this, 0x00)
-                .WithValueField(0, 8, FieldMode.Read, name: "RATE_Y_MSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Y, true)); //RO
-            Registers.RateZLSB.Define(this, 0x00)
-                .WithValueField(0, 8, FieldMode.Read, name: "RATE_Z_LSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Z, false)); //RO
-            Registers.RateZMSB.Define(this, 0x00)
-                .WithValueField(0, 8, FieldMode.Read, name: "RATE_Z_MSB", valueProviderCallback: _ => DPStoByte(fifo.Sample.Z, true)); //RO
+            Registers.ChipID.Define(this, 0x50); //RO
+            Registers.ErrReg.Define(this, 0x00); //RO
+            Registers.Status.Define(this, 0x00);
+            Registers.Data0.Define(this, 0x00)
+                .WithValueField(0, 8, FieldMode.Read, name: "Press_[7:0]", valueProviderCallback: _ => DPStoByte(fifo.Sample.X, false)); //RO
+            Registers.Data1.Define(this, 0x00)
+                .WithValueField(0, 8, FieldMode.Read, name: "Press_[15:8]", valueProviderCallback: _ => DPStoByte(fifo.Sample.X, true)); //RO
+            Registers.Data2.Define(this, 0x80)
+                .WithValueField(0, 8, FieldMode.Read, name: "Press_[23:16]", valueProviderCallback: _ => DPStoByte(fifo.Sample.Y, false)); //RO
+            Registers.Data3.Define(this, 0x00)
+                .WithValueField(0, 8, FieldMode.Read, name: "Temp_[7:0]", valueProviderCallback: _ => DPStoByte(fifo.Sample.Y, true)); //RO
+            Registers.Data4.Define(this, 0x00)
+                .WithValueField(0, 8, FieldMode.Read, name: "Temp_[15:8]", valueProviderCallback: _ => DPStoByte(fifo.Sample.Z, false)); //RO
+            Registers.Data5.Define(this, 0x80)
+                .WithValueField(0, 8, FieldMode.Read, name: "Temp_[23:16]", valueProviderCallback: _ => DPStoByte(fifo.Sample.Z, true)); //RO
 
-            Registers.GyroIntStat1.Define(this, 0x00)
+            Registers.IntCtrl.Define(this, 0x02);
+            Registers.IfConf.Define(this, 0x00);
+            Registers.PwrCtrl.Define(this, 0x00);
+            Registers.OSR.Define(this, 0x02);
+            Registers.ODR.Define(this, 0x00);
+            Registers.Config.Define(this, 0x00);
+
+            Registers.Cmd.Define(this, 0x00) //WO
+                .WithWriteCallback((_, val) =>
+                {
+                    if(val == resetCommand)
+                    {
+                        Reset();
+                    }
+                });
+
+           Registers.GyroIntStat1.Define(this, 0x00)
                 .WithReservedBits(0, 4)
                 .WithFlag(4, name: "fifo_int")
                 .WithReservedBits(5, 2)
@@ -160,14 +178,7 @@ namespace Antmicro.Renode.Peripherals.CF2
             Registers.GyroBandwidth.Define(this, 0x80)
                 .WithValueField(0, 8, name: "gyro_bw"); //RW //TODO should be used to determine output data rate
             Registers.GyroLPM1.Define(this, 0x00); //RW
-            Registers.GyroSoftreset.Define(this, 0x00) //WO
-                .WithWriteCallback((_, val) =>
-                {
-                    if(val == resetCommand)
-                    {
-                        Reset();
-                    }
-                });
+
             Registers.GyroIntCtrl.Define(this, 0x00)
                 .WithReservedBits(0, 6)
                 .WithFlag(6, out fifoEn, name: "fifo_en") // Currently unused
@@ -216,36 +227,38 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         private enum Registers
         {
-            GyroChipID = 0x00, // Read-Only
+            ChipId = 0x00, // Read-Only
             // 0x01 reserved
-            RateXLSB = 0x02, // Read-Only
-            RateXMSB = 0x03, // Read-Only
-            RateYLSB = 0x04, // Read-Only
-            RateYMSB = 0x05, // Read-Only
-            RateZLSB = 0x06, // Read-Only
-            RateZMSB = 0x07, // Read-Only
-            // 0x08 - 0x09 reserved
-            GyroIntStat1 = 0x0A, // Read-Only
-            // 0x0B - 0x0D reserved
-            FIFOStatus = 0x0E, // Read-Only
-            GyroRange = 0x0F, // Read-Write
-            GyroBandwidth = 0x10, // Read-Write
-            GyroLPM1 = 0x11, // Read-Write
-            // 0x12 - 0x13 reserved
-            GyroSoftreset = 0x14, // Write-Only
-            GyroIntCtrl = 0x15, // Read-Write
-            Int3Int4IOConf = 0x16, // Read-Write
-            // 0x17 reserved
-            Int3Int4IOMap = 0x18, // Read-Write
-            // 0x19 - 0x1D reserved
-            FIFOWmEn = 0x1E, // Read-Write
-            // 0x1F - 0x33 reseved
-            FIFOExtIntS = 0x34, // Read-Write
-            // 0x35 - 0x3B reserved
-            GyroSelfTest = 0x3C,
-            FIFOConfig0 = 0x3D, // Read-Write
-            FIFOConfig1 = 0x3E, // Read-Write
-            FIFOData = 0x3F // Read-Only
+            ErrReg = 0x02, // Read-Only
+            Status = 0x03, // Read-Only
+            Data0 = 0x04, // Read-Only
+            Data1 = 0x05, // Read-Only
+            Data2 = 0x06, // Read-Only
+            Data3 = 0x07, // Read-Only
+            Data4 = 0x08, // Read-Only
+            Data5 = 0x09, // Read-Only
+            // 0x0A - 0x0B reserved
+            Sensortime0 = 0x0C, // Read-Only
+            Sensortime1 = 0x0D, // Read-Only
+            Sensortime2 = 0x0E, // Read-Only
+            Event = 0x10, // Read-Only
+            IntStatus = 0x11,  // Read-Only
+            FIFOLength0 = 0x12, // Read-Only
+            FIFOLength1 = 0x13, // Read-Only
+            FIFOData = 0x14, // Read-Only
+            FIFOWtm0 = 0x15, // Read-Write
+            FIFOWtm1 = 0x16, // Read-Write
+            FIFOConfig1 = 0x17, // Read-Write
+            FIFOConfig2 = 0x18, // Read-Write
+            IntCtrl = 0x19, // Read-Write
+            IfConf = 0x1A, // Read-Write
+            PwrCtrl = 0x1B, // Read-Write
+            OSR = 0x1C, // Read-Write
+            ODR = 0x1D, // Read-Write
+            // 0x1E reserved
+            Config = 0x1F, // Read-Write
+            // 0x20 - 0x7D reserved
+            Cmd = 0x7E // Read-Write
         }
     }
 }
