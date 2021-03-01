@@ -43,6 +43,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Peripherals\CF2\BMP388.cs" />
     <Compile Include="Peripherals\CF2\BMI088_ACCEL.cs" />
     <Compile Include="Peripherals\CF2\BMI088_GYRO.cs" />
     <Compile Include="Peripherals\CF2\STM32_Basic_Timer.cs" />
