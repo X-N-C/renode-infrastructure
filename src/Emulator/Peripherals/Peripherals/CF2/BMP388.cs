@@ -47,21 +47,32 @@ namespace Antmicro.Renode.Peripherals.CF2
             this.Log(LogLevel.Noisy, "Write with {0} bytes of data: {1}", data.Length, Misc.PrettyPrintCollectionHex(data));
             registerAddress = (Registers)data[0];
 
-            if(data.Length > 1)
+            // length=1 preparing to read
+            // length=3 one byte of data
+            // (n*2)+2 burst write with n bytes
+
+            // skip the first byte as it contains register address
+            // Must skip final byte, problem with I2C
+
+            if(data.Length == 1)
             {
-                // TODO implement burst write capability
-                // skip the first byte as it contains register address
-                // Must skip final byte, problem with I2C
-                for(var i = 1; i < data.Length - 1; i++)
-                {
-                 this.Log(LogLevel.Noisy, "Writing 0x{0:X} to register {1} (0x{1:X})", data[i], registerAddress);
-                 RegistersCollection.Write((byte)registerAddress, data[i]);
-                 registerAddress++;
-                }
+                this.Log(LogLevel.Noisy, "Preparing to read register {0} (0x{0:X})", registerAddress);
+            }
+            else if(data.Length == 3)
+            {
+                RegistersCollection.Write((byte)registerAddress, data[1]);
+                this.Log(LogLevel.Noisy, "Writing one byte 0x{0:X} to register {1} (0x{1:X})", data[1], registerAddress);
             }
             else
             {
-                this.Log(LogLevel.Noisy, "Preparing to read register {0} (0x{0:X})", registerAddress);
+                // Burst write causes one extra trash byte to be transmitted in addition
+                // to the extra I2C byte.
+                this.Log(LogLevel.Noisy, "Burst write mode!");
+                for(var i = 0; 2*i < data.Length-2; i++)
+                {
+                    RegistersCollection.Write(data[2*i], data[2*i+1]);
+                    this.Log(LogLevel.Noisy, "Writing 0x{0:X} to register {1} (0x{1:X})", data[2*i+1], (Registers)data[2*i]);
+                }
             }
         }
 
@@ -131,7 +142,6 @@ namespace Antmicro.Renode.Peripherals.CF2
             Registers.ErrReg.Define(this, 0x00); //RO
             Registers.Status.Define(this, 0x10); //RO NOTE wrong reset value, command decoder always ready in simulation?
             Registers.Data0.Define(this, 0x00)
-                //.WithValueField(0, 8, FieldMode.Read, name: "Press_[7:0]", valueProviderCallback: _ => DPStoByte(fifo.Sample.X, false)); //RO
                 .WithValueField(0, 8, FieldMode.Read, name: "Press_[7:0]", valueProviderCallback: _ => PtoByte(fifoP.Sample.Value, 0)); //RO
             Registers.Data1.Define(this, 0x00)
                 .WithValueField(0, 8, FieldMode.Read, name: "Press_[15:8]", valueProviderCallback: _ => PtoByte(fifoP.Sample.Value, 8)); //RO
@@ -147,9 +157,17 @@ namespace Antmicro.Renode.Peripherals.CF2
             Registers.IntCtrl.Define(this, 0x02);
             Registers.IfConf.Define(this, 0x00);
             Registers.PwrCtrl.Define(this, 0x00);
-            Registers.OSR.Define(this, 0x02);
-            Registers.ODR.Define(this, 0x00);
-            Registers.Config.Define(this, 0x00);
+            Registers.OSR.Define(this, 0x02) //RW
+                .WithValueField(0, 3, name: "osr_p")
+                .WithValueField(3, 3, name: "osr_t")
+                .WithReservedBits(6, 2);
+            Registers.ODR.Define(this, 0x00) //RW
+                .WithValueField(0, 5, name: "odr_sel")
+                .WithReservedBits(5, 3);
+            Registers.Config.Define(this, 0x00) //RW
+                .WithReservedBits(0, 1)
+                .WithValueField(1, 3, name: "iir_filter")
+                .WithReservedBits(4, 4);
 
             Registers.Cmd.Define(this, 0x00) //WO
                 .WithWriteCallback((_, val) =>
@@ -159,38 +177,6 @@ namespace Antmicro.Renode.Peripherals.CF2
                         Reset();
                     }
                 });
-
-           /*Registers.GyroIntStat1.Define(this, 0x00)
-                .WithReservedBits(0, 4)
-                .WithFlag(4, name: "fifo_int")
-                .WithReservedBits(5, 2)
-                .WithFlag(7, name: "gyro_drdy"); //RO
-            // FIFOSTATUS?
-            Registers.GyroRange.Define(this, 0x00)
-                .WithValueField(0, 8, out gyroRange, name: "gyro_range"); //RW
-            Registers.GyroBandwidth.Define(this, 0x80)
-                .WithValueField(0, 8, name: "gyro_bw"); //RW //TODO should be used to determine output data rate
-            Registers.GyroLPM1.Define(this, 0x00); //RW
-
-            Registers.GyroIntCtrl.Define(this, 0x00)
-                .WithReservedBits(0, 6)
-                .WithFlag(6, out fifoEn, name: "fifo_en") // Currently unused
-                .WithFlag(7, out dataEn, name: "data_en");
-            Registers.Int1Int2IOConf.Define(this, 0x0F)
-                .WithFlag(0, name: "int3_lvl")
-                .WithFlag(1, name: "int3_od")
-                .WithFlag(2, name: "int4_lvl")
-                .WithFlag(3, name: "int4_od")
-                .WithReservedBits(4, 4); // TODO implement?
-            Registers.Int1Int2IOMap.Define(this, 0x00)
-                .WithFlag(0, out int3Data, name: "int3_data")
-                .WithReservedBits(1, 1)
-                .WithFlag(2, out int3Fifo, name: "int3_fifo")
-                .WithReservedBits(3, 2)
-                .WithFlag(5, out int4Fifo, name: "int4_fifo")
-                .WithReservedBits(6, 1)
-                .WithFlag(7, out int4Data, name: "int4_data"); // data done
-                */
         }
 
         private Registers registerAddress;
@@ -199,14 +185,6 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         // One bit: IFlagRegisterField
         // Multiple: IValueRegisterField
-
-        /*private IValueRegisterField gyroRange;
-        private IFlagRegisterField dataEn;
-        private IFlagRegisterField fifoEn;
-        private IFlagRegisterField int3Data;
-        private IFlagRegisterField int3Fifo;
-        private IFlagRegisterField int4Fifo;
-        private IFlagRegisterField int4Data;*/
 
         private const byte resetCommand = 0xB6;
 
