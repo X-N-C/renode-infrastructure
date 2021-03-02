@@ -14,10 +14,11 @@ using Antmicro.Renode.Logging;
 using Antmicro.Renode.Core;
 using Antmicro.Renode.Core.Structure.Registers;
 using Antmicro.Renode.Utilities;
+using Antmicro.Renode.Peripherals.UART;
 
 namespace Antmicro.Renode.Peripherals.CF2
 {
-    public class BMI088_GYRO : II2CPeripheral, IProvidesRegisterCollection<ByteRegisterCollection>, ISensor
+    public class BMI088_GYRO : II2CPeripheral, IProvidesRegisterCollection<ByteRegisterCollection>, ISensor, IUART
     {
         public BMI088_GYRO()
         {
@@ -27,6 +28,16 @@ namespace Antmicro.Renode.Peripherals.CF2
             Int4 = new GPIO();
             DefineRegisters();
         }
+
+        public event Action<byte> CharReceived;
+        public void WriteChar(byte value)
+        {
+            TriggerDataInterrupt();
+        }
+
+        public uint BaudRate { get; }
+        public Bits StopBits { get; }
+        public Parity ParityBit { get; }
 
         public void Reset()
         {
@@ -120,7 +131,6 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         public void FeedGyroSample(decimal x, decimal y, decimal z, int repeat = 1)
         {
-
             var sample = new Vector3DSample(x, y, z);
             for(var i = 0; i < repeat; i++)
             {
