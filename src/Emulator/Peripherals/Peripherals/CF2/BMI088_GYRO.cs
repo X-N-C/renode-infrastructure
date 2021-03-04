@@ -195,7 +195,8 @@ namespace Antmicro.Renode.Peripherals.CF2
                 .WithReservedBits(3, 2)
                 .WithFlag(5, out int4Fifo, name: "int4_fifo")
                 .WithReservedBits(6, 1)
-                .WithFlag(7, out int4Data, name: "int4_data"); // data done
+                .WithFlag(7, out int4Data, name: "int4_data");
+            Registers.GyroSelfTest.Define(this, 0x12); // Hack: Reset value is value to be read on succesful self test
         }
 
         private Registers registerAddress;
