@@ -112,7 +112,8 @@ namespace Antmicro.Renode.Peripherals.CF2
                             return updateInterruptFlag;
                         },
                         name: "Update interrupt flag (UIF)")
-                    .WithTag("Reserved", 1, 31)
+                    //.WithValueField(1, 31)
+                    .WithTag("!!!!!!!!", 1, 31)
                     //.WithReservedBits(1,31)
                     /*.WithFlag(1, FieldMode.Read | FieldMode.WriteZeroToClear, writeCallback: (_, val) => ClaimCaptureCompareInterrupt(0, val), valueProviderCallback: _ => ccInterruptFlag[0], name: "Capture/Compare 1 interrupt flag (CC1IF)")
                     .WithFlag(2, FieldMode.Read | FieldMode.WriteZeroToClear, writeCallback: (_, val) => ClaimCaptureCompareInterrupt(1, val), valueProviderCallback: _ => ccInterruptFlag[1], name: "Capture/Compare 2 interrupt flag (CC2IF)")
