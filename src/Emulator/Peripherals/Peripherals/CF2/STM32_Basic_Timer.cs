@@ -77,21 +77,23 @@ namespace Antmicro.Renode.Peripherals.CF2
 
                 {(long)Registers.DmaOrInterruptEnable, new DoubleWordRegister(this)
                     .WithFlag(0, out updateInterruptEnable, name: "Update interrupt enable (UIE)")
-                    .WithFlag(1, valueProviderCallback: _ => ccTimers[0].EventEnabled, writeCallback: (_, val) => WriteCaptureCompareInterruptEnable(0, val), name: "Capture/Compare 1 interrupt enable (CC1IE)")
+                    /*.WithFlag(1, valueProviderCallback: _ => ccTimers[0].EventEnabled, writeCallback: (_, val) => WriteCaptureCompareInterruptEnable(0, val), name: "Capture/Compare 1 interrupt enable (CC1IE)")
                     .WithFlag(2, valueProviderCallback: _ => ccTimers[1].EventEnabled, writeCallback: (_, val) => WriteCaptureCompareInterruptEnable(1, val), name: "Capture/Compare 2 interrupt enable (CC2IE)")
                     .WithFlag(3, valueProviderCallback: _ => ccTimers[2].EventEnabled, writeCallback: (_, val) => WriteCaptureCompareInterruptEnable(2, val), name: "Capture/Compare 3 interrupt enable (CC3IE)")
-                    .WithFlag(4, valueProviderCallback: _ => ccTimers[3].EventEnabled, writeCallback: (_, val) => WriteCaptureCompareInterruptEnable(3, val), name: "Capture/Compare 4 interrupt enable (CC4IE)")
-                    .WithReservedBits(5, 1)
-                    .WithTag("Trigger interrupt enable (TIE)", 6, 1)
-                    .WithReservedBits(7, 1)
+                    .WithFlag(4, valueProviderCallback: _ => ccTimers[3].EventEnabled, writeCallback: (_, val) => WriteCaptureCompareInterruptEnable(3, val), name: "Capture/Compare 4 interrupt enable (CC4IE)")*/
+                    //.WithReservedBits(5, 1)
+                    .WithReservedBits(1, 7)
+                    //.WithTag("Trigger interrupt enable (TIE)", 6, 1)
+                    //.WithReservedBits(7, 1)
                     .WithTag("Update DMA request enable (UDE)", 8, 1)
-                    .WithTag("Capture/Compare 1 DMA request enable (CC1DE)", 9, 1)
+                    /*.WithTag("Capture/Compare 1 DMA request enable (CC1DE)", 9, 1)
                     .WithTag("Capture/Compare 2 DMA request enable (CC2DE)", 10, 1)
                     .WithTag("Capture/Compare 3 DMA request enable (CC3DE)", 11, 1)
-                    .WithTag("Capture/Compare 4 DMA request enable (CC4DE)", 12, 1)
-                    .WithReservedBits(13, 1)
-                    .WithTag("Trigger DMA request enable (TDE)", 14, 1)
-                    .WithReservedBits(15, 17)
+                    .WithTag("Capture/Compare 4 DMA request enable (CC4DE)", 12, 1)*/
+                    //.WithReservedBits(13, 1)
+                    //.WithTag("Trigger DMA request enable (TDE)", 14, 1)
+                    //.WithReservedBits(15, 17)
+                    .WithReservedBits(9, 23)
                     .WithWriteCallback((_, __) => UpdateInterrupts())
                 },
 
