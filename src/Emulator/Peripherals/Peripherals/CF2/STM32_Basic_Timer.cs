@@ -297,8 +297,8 @@ namespace Antmicro.Renode.Peripherals.CF2
             {
                 value |= ccInterruptFlag[i] & ccTimers[i].EventEnabled;
             }
-            this.Log(LogLevel.Noisy, "UIF {0}, ccF1 {1}, ccF2 {2}, ccF3 {3}, ccF4 {4}", updateInterruptFlag, ccInterruptFlag[0], ccInterruptFlag[1], ccInterruptFlag[2], ccInterruptFlag[3]);
-            this.Log(LogLevel.Noisy, "UIE {0}, ccEE1 {1}, ccEE2 {2}, ccEE3 {3}, ccEE4 {4}", updateInterruptEnable.Value, ccTimers[0].EventEnabled, ccTimers[1].EventEnabled, ccTimers[2].EventEnabled, ccTimers[3].EventEnabled);
+            //this.Log(LogLevel.Noisy, "UIF {0}, ccF1 {1}, ccF2 {2}, ccF3 {3}, ccF4 {4}", updateInterruptFlag, ccInterruptFlag[0], ccInterruptFlag[1], ccInterruptFlag[2], ccInterruptFlag[3]);
+            //this.Log(LogLevel.Noisy, "UIE {0}, ccEE1 {1}, ccEE2 {2}, ccEE3 {3}, ccEE4 {4}", updateInterruptEnable.Value, ccTimers[0].EventEnabled, ccTimers[1].EventEnabled, ccTimers[2].EventEnabled, ccTimers[3].EventEnabled);
 
             IRQ.Set(value);
         }
@@ -306,13 +306,13 @@ namespace Antmicro.Renode.Peripherals.CF2
         private uint initialLimit;
         private uint autoReloadValue;
         private bool updateInterruptFlag;
-        private bool[] ccInterruptFlag = new bool[NumberOfCCChannels];
+        private bool[] ccInterruptFlag = new bool[1+NumberOfCCChannels];
         private readonly IFlagRegisterField updateDisable;
         private readonly IFlagRegisterField updateRequestSource;
         private readonly IFlagRegisterField updateInterruptEnable;
         private readonly IFlagRegisterField autoReloadPreloadEnable;
         private readonly DoubleWordRegisterCollection registers;
-        private readonly LimitTimer[] ccTimers = new LimitTimer[NumberOfCCChannels];
+        private readonly LimitTimer[] ccTimers = new LimitTimer[1+NumberOfCCChannels];
 
         private const int NumberOfCCChannels = 0;
 
