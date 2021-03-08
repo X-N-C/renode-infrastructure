@@ -314,7 +314,7 @@ namespace Antmicro.Renode.Peripherals.CF2
         private readonly DoubleWordRegisterCollection registers;
         private readonly LimitTimer[] ccTimers = new LimitTimer[NumberOfCCChannels];
 
-        private const int NumberOfCCChannels = 4;
+        private const int NumberOfCCChannels = 0;
 
         private enum Registers : long
         {
