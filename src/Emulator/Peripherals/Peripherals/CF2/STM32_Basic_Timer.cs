@@ -112,9 +112,8 @@ namespace Antmicro.Renode.Peripherals.CF2
                             return updateInterruptFlag;
                         },
                         name: "Update interrupt flag (UIF)")
-                    .WithValueField(1, 31)
-                    //.WithTag("Reserved", 1, 31)
-                    //.WithReservedBits(1,31)
+                    //.WithValueField(1, 31) //Silence...
+                    .WithReservedBits(1,31)
                     /*.WithFlag(1, FieldMode.Read | FieldMode.WriteZeroToClear, writeCallback: (_, val) => ClaimCaptureCompareInterrupt(0, val), valueProviderCallback: _ => ccInterruptFlag[0], name: "Capture/Compare 1 interrupt flag (CC1IF)")
                     .WithFlag(2, FieldMode.Read | FieldMode.WriteZeroToClear, writeCallback: (_, val) => ClaimCaptureCompareInterrupt(1, val), valueProviderCallback: _ => ccInterruptFlag[1], name: "Capture/Compare 2 interrupt flag (CC2IF)")
                     .WithFlag(3, FieldMode.Read | FieldMode.WriteZeroToClear, writeCallback: (_, val) => ClaimCaptureCompareInterrupt(2, val), valueProviderCallback: _ => ccInterruptFlag[2], name: "Capture/Compare 3 interrupt flag (CC3IF)")
@@ -144,7 +143,8 @@ namespace Antmicro.Renode.Peripherals.CF2
                         }
                         else if(Direction == Direction.Descending)
                         {
-                            Value = autoReloadValue;
+                            this.Log(LogLevel.Error, "Direction should only be ascending for the basic timer!");
+                            //Value = autoReloadValue;
                         }
                         if(!updateRequestSource.Value && updateInterruptEnable.Value)
                         {
