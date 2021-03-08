@@ -65,11 +65,13 @@ namespace Antmicro.Renode.Peripherals.CF2
                     .WithFlag(1, out updateDisable, name: "Update disable (UDIS)")
                     .WithFlag(2, out updateRequestSource, name: "Update request source (URS)")
                     .WithFlag(3, writeCallback: (_, val) => Mode = val ? WorkMode.OneShot : WorkMode.Periodic, valueProviderCallback: _ => Mode == WorkMode.OneShot, name: "One-pulse mode (OPM)")
-                    .WithFlag(4, writeCallback: (_, val) => Direction = val ? Direction.Descending : Direction.Ascending, valueProviderCallback: _ => Direction == Direction.Descending, name: "Direction (DIR)")
-                    .WithTag("Center-aligned mode selection (CMS)", 5, 2)
+                    //.WithFlag(4, writeCallback: (_, val) => Direction = val ? Direction.Descending : Direction.Ascending, valueProviderCallback: _ => Direction == Direction.Descending, name: "Direction (DIR)") // Basic timer Direction always ascending
+                    .WithReservedBits(4, 3)
+                    //.WithTag("Center-aligned mode selection (CMS)", 5, 2)
                     .WithFlag(7, out autoReloadPreloadEnable, name: "Auto-reload preload enable (APRE)")
-                    .WithTag("Clock Division (CKD)", 8, 2)
-                    .WithReservedBits(10, 22)
+                    //.WithTag("Clock Division (CKD)", 8, 2)
+                    //.WithReservedBits(10, 22)
+                    .WithReservedBits(8, 24)
                     .WithWriteCallback((_, __) => { UpdateCaptureCompareTimers(); UpdateInterrupts(); })
                 },
 
@@ -122,7 +124,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                     .WithValueField(11, 1, FieldMode.WriteZeroToClear, writeCallback: (_, __) => {}, name: "Capture/Compare 3 overcapture flag (CC3OF)")
                     .WithValueField(12, 1, FieldMode.WriteZeroToClear, writeCallback: (_, __) => {}, name: "Capture/Compare 4 overcapture flag (CC4OF)")
                     .WithReservedBits(13, 18)*/
-                    //.WithWriteCallback((_, __) => UpdateInterrupts())
+                    .WithWriteCallback((_, __) => UpdateInterrupts())
                 },
 
                 {(long)Registers.EventGeneration, new DoubleWordRegister(this)
