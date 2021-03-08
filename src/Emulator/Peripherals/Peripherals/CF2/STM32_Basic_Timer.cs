@@ -37,14 +37,14 @@ namespace Antmicro.Renode.Peripherals.CF2
                 }
                 Limit = autoReloadValue;
 
-                for(var i = 0; i < NumberOfCCChannels; ++i)
+                /*for(var i = 0; i < NumberOfCCChannels; ++i)
                 {
                     ccTimers[i].Enabled = Enabled && ccTimers[i].EventEnabled;
-                }
+                }*/
                 UpdateInterrupts();
             };
 
-            for(var i = 0; i < NumberOfCCChannels; ++i)
+            /*for(var i = 0; i < NumberOfCCChannels; ++i)
             {
                 var j = i;
                 ccTimers[j] = new LimitTimer(machine.ClockSource, frequency, this, String.Format("cctimer{0}", j + 1), limit: initialLimit, eventEnabled: true, direction: Direction.Ascending, enabled: false, autoUpdate: false);
@@ -56,7 +56,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                     this.Log(LogLevel.Noisy, "cctimer{0}: Compare IRQ pending", j + 1);
                     UpdateInterrupts();
                 };
-            }
+            }*/
 
             var registersMap = new Dictionary<long, DoubleWordRegister>
             {
@@ -72,7 +72,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                     //.WithTag("Clock Division (CKD)", 8, 2)
                     //.WithReservedBits(10, 22)
                     .WithReservedBits(8, 24)
-                    .WithWriteCallback((_, __) => { UpdateCaptureCompareTimers(); UpdateInterrupts(); })
+                    .WithWriteCallback((_, __) => { /*UpdateCaptureCompareTimers();*/ UpdateInterrupts(); })
                 },
 
                 {(long)Registers.DmaOrInterruptEnable, new DoubleWordRegister(this)
@@ -151,13 +151,13 @@ namespace Antmicro.Renode.Peripherals.CF2
                             this.Log(LogLevel.Noisy, "IRQ pending");
                             updateInterruptFlag = true;
                         }
-                        for(var i = 0; i < NumberOfCCChannels; ++i)
+                        /*for(var i = 0; i < NumberOfCCChannels; ++i)
                         {
                             if(ccTimers[i].Enabled)
                             {
                                 ccTimers[i].Value = Value;
                             }
-                        }
+                        }*/
                     }, name: "Update generation (UG)")
                     /*.WithTag("Capture/compare 1 generation (CC1G)", 1, 1)
                     .WithTag("Capture/compare 2 generation (CC2G)", 2, 1)
@@ -174,13 +174,13 @@ namespace Antmicro.Renode.Peripherals.CF2
                     .WithValueField(0, 32, writeCallback: (_, val) => Value = val, valueProviderCallback: _ => (uint)Value, name: "Counter value (CNT)")
                     .WithWriteCallback((_, val) =>
                     {
-                        for(var i = 0; i < NumberOfCCChannels; ++i)
+                        /*for(var i = 0; i < NumberOfCCChannels; ++i)
                         {
                             if(val < ccTimers[i].Limit)
                             {
                                 ccTimers[i].Value = val;
                             }
-                        }
+                        }*/
                         UpdateInterrupts();
                     })
                 },
@@ -189,10 +189,10 @@ namespace Antmicro.Renode.Peripherals.CF2
                     .WithValueField(0, 32, writeCallback: (_, val) => Divider = (int)val + 1, valueProviderCallback: _ => (uint)Divider - 1, name: "Prescaler value (PSC)")
                     .WithWriteCallback((_, __) =>
                     {
-                        for(var i = 0; i < NumberOfCCChannels; ++i)
+                        /*for(var i = 0; i < NumberOfCCChannels; ++i)
                         {
                             ccTimers[i].Divider = Divider;
-                        }
+                        }*/
                         UpdateInterrupts();
                     })
                 },
@@ -210,14 +210,14 @@ namespace Antmicro.Renode.Peripherals.CF2
                 },
             };
 
-            for(var i = 0; i < NumberOfCCChannels; ++i)
+            /*for(var i = 0; i < NumberOfCCChannels; ++i)
             {
                 var j = i;
                 registersMap.Add((long)Registers.CaptureOrCompare1 + (j * 0x4), new DoubleWordRegister(this)
                     .WithValueField(0, 32, valueProviderCallback: _ => (uint)ccTimers[j].Limit, writeCallback: (_, val) => { ccTimers[j].Limit = val; }, name: String.Format("Capture/compare value {0} (CCR{0})", j + 1))
                     .WithWriteCallback((_, __) => { UpdateCaptureCompareTimer(j); UpdateInterrupts(); })
                 );
-            }
+            }*/
 
             registers = new DoubleWordRegisterCollection(this, registersMap);
             Reset();
@@ -242,11 +242,11 @@ namespace Antmicro.Renode.Peripherals.CF2
             autoReloadValue = initialLimit;
             Limit = initialLimit;
             updateInterruptFlag = false;
-            for(var i = 0; i < NumberOfCCChannels; ++i)
+            /*for(var i = 0; i < NumberOfCCChannels; ++i)
             {
                 ccTimers[i].Reset();
                 ccInterruptFlag[i] = false;
-            }
+            }*/
             UpdateInterrupts();
         }
 
@@ -254,7 +254,7 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         public long Size => 0x400;
 
-        private void UpdateCaptureCompareTimer(int i)
+        /*private void UpdateCaptureCompareTimer(int i)
         {
             ccTimers[i].Enabled = Enabled && ccTimers[i].EventEnabled && Value < ccTimers[i].Limit;
             if(ccTimers[i].Enabled)
@@ -287,16 +287,16 @@ namespace Antmicro.Renode.Peripherals.CF2
                 ccInterruptFlag[i] = false;
                 this.Log(LogLevel.Noisy, "cctimer{0}: Compare IRQ claimed", i + 1);
             }
-        }
+        }*/
 
         private void UpdateInterrupts()
         {
             var value = false;
             value |= updateInterruptFlag & updateInterruptEnable.Value;
-            for(var i  = 0; i < NumberOfCCChannels; ++i)
+            /*for(var i  = 0; i < NumberOfCCChannels; ++i)
             {
                 value |= ccInterruptFlag[i] & ccTimers[i].EventEnabled;
-            }
+            }*/
             //this.Log(LogLevel.Noisy, "UIF {0}, ccF1 {1}, ccF2 {2}, ccF3 {3}, ccF4 {4}", updateInterruptFlag, ccInterruptFlag[0], ccInterruptFlag[1], ccInterruptFlag[2], ccInterruptFlag[3]);
             //this.Log(LogLevel.Noisy, "UIE {0}, ccEE1 {1}, ccEE2 {2}, ccEE3 {3}, ccEE4 {4}", updateInterruptEnable.Value, ccTimers[0].EventEnabled, ccTimers[1].EventEnabled, ccTimers[2].EventEnabled, ccTimers[3].EventEnabled);
 
@@ -306,15 +306,15 @@ namespace Antmicro.Renode.Peripherals.CF2
         private uint initialLimit;
         private uint autoReloadValue;
         private bool updateInterruptFlag;
-        private bool[] ccInterruptFlag = new bool[1+NumberOfCCChannels];
+        //private bool[] ccInterruptFlag = new bool[1+NumberOfCCChannels];
         private readonly IFlagRegisterField updateDisable;
         private readonly IFlagRegisterField updateRequestSource;
         private readonly IFlagRegisterField updateInterruptEnable;
         private readonly IFlagRegisterField autoReloadPreloadEnable;
         private readonly DoubleWordRegisterCollection registers;
-        private readonly LimitTimer[] ccTimers = new LimitTimer[1+NumberOfCCChannels];
+        //private readonly LimitTimer[] ccTimers = new LimitTimer[1+NumberOfCCChannels];
 
-        private const int NumberOfCCChannels = 0;
+        //private const int NumberOfCCChannels = 4;
 
         private enum Registers : long
         {
