@@ -26,10 +26,19 @@ namespace Antmicro.Renode.Peripherals.CF2
             //var result = outputBuffer.ToArray();
             //this.Log(LogLevel.Noisy, "Reading {0} bytes from the device (asked for {1} bytes).", result.Length, count);
             //outputBuffer.Clear();
-            this.Log(LogLevel.Noisy, "Reading 0x{0:X} bytes from EEPROM at address 0x{1:X}", count, (highAddress<<8)+lowAddress);
-            byte[] result = new byte[25];
-            Array.Copy(storage, (highAddress<<8)+lowAddress, result, 0, 25); //TODO Handle out of bounds case
+            this.Log(LogLevel.Noisy, "Reading 0x{0:X} bytes from EEPROM at address 0x{1:X}", count, ((ushort)highAddress<<8)+lowAddress);
+            byte[] result = new byte[storage.Length];
+            //Array.Copy(storage, ((ushort)highAddress<<8)+lowAddress, result, 0, 25); //TODO Handle out of bounds case
+
+            var ap = ((ushort)highAddress<<8)+lowAddress;
+            Array.Copy(storage, ap, result, 0, storage.Length - ap);
+            Array.Copy(storage, 0, result, storage.Length - ap, ap);
+
             lowAddress++; //TODO also increase highAddress
+            if(lowAddress == 0)
+            {
+                highAddress++;
+            }
             return result;
             // Implemented: Current, Random and almost Sequential Read
             // Currently no way to know how many bytes are read and thus
@@ -54,10 +63,10 @@ namespace Antmicro.Renode.Peripherals.CF2
             {
                 this.Log(LogLevel.Warning, "Unused bits: 0x{0:X} for high address ignored!", packet[0] & ~0x1F);
             }
-            highAddress = (ushort)(packet[0] & 0x1F);
+            highAddress = (byte)(packet[0] & 0x1F);
             lowAddress = packet[1];
             byte inPageAddress = (byte)(lowAddress & 0x1F);
-            ushort pageAddress = (ushort)((highAddress << 8) + (lowAddress & 0xE0));
+            ushort pageAddress = (ushort)(((ushort)highAddress << 8) + (lowAddress & 0xE0));
             this.Log(LogLevel.Noisy, "inPageAddress: 0x{0:X}, pageAddress: 0x{1:X}, packet length: {2}",inPageAddress, pageAddress, packet.Length);
             //TODO The I2C seems to send one packet too much of transmited data, workaround by ignoring the final byte (i.e. -3 instead of -2)?
             for(int i = 0; i < packet.Length - 3; ++i)
@@ -111,7 +120,7 @@ namespace Antmicro.Renode.Peripherals.CF2
         //private byte[] data = {0x30, 0x78, 0x42, 0x43, 0x01, 0x50, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE8, 0xE9, 0xEA, 0xEB, 0xEC, 0x12};
         private byte[] configdata = {0x30, 0x78, 0x42, 0x43, 0x01, 0x50, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE7, 0xE7, 0xE7, 0xE7, 0xE7, 0x04, 0xBC, 0xCF}; // Wrong checksum
         private byte[] storage = new byte[8192];
-        private ushort highAddress; // Masked with 0x1F?
+        private byte highAddress; // Masked with 0x1F?
         private byte lowAddress;
         //[highAddress<<8+lowAddress] ?
         //private byte[] data = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44};
