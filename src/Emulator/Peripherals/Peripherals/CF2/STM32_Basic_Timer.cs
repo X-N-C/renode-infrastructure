@@ -122,7 +122,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                     .WithValueField(11, 1, FieldMode.WriteZeroToClear, writeCallback: (_, __) => {}, name: "Capture/Compare 3 overcapture flag (CC3OF)")
                     .WithValueField(12, 1, FieldMode.WriteZeroToClear, writeCallback: (_, __) => {}, name: "Capture/Compare 4 overcapture flag (CC4OF)")
                     .WithReservedBits(13, 18)*/
-                    .WithWriteCallback((_, __) => UpdateInterrupts())
+                    //.WithWriteCallback((_, __) => UpdateInterrupts())
                 },
 
                 {(long)Registers.EventGeneration, new DoubleWordRegister(this)
