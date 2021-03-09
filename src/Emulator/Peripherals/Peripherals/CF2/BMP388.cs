@@ -91,7 +91,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                 fifoT.TryDequeueNewSample();
             }
 
-            var result = new byte[registerAddress==Registers.Data0?6 : registerAddress==Registers.OSR?4 : 1 ];
+            var result = new byte[registerAddress==Registers.Data0?6 : registerAddress==Registers.OSR?4 : registerAddress==Registers.Calib0?21 : 1 ];
             for(var i = 0; i < result.Length; i++)
             {
                 result[i] = RegistersCollection.Read((byte)registerAddress + i);
