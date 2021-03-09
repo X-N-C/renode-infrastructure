@@ -177,6 +177,28 @@ namespace Antmicro.Renode.Peripherals.CF2
                         Reset();
                     }
                 });
+
+            Registers.Calib0.Define(this, 0xC5);
+            Registers.Calib1.Define(this, 0x6A);
+            Registers.Calib2.Define(this, 0xDD);
+            Registers.Calib3.Define(this, 0x48);
+            Registers.Calib4.Define(this, 0xF6);
+            Registers.Calib5.Define(this, 0xE8);
+            Registers.Calib6.Define(this, 0x01);
+            Registers.Calib7.Define(this, 0x25);
+            Registers.Calib8.Define(this, 0xF7);
+            Registers.Calib9.Define(this, 0x23);
+            Registers.Calib10.Define(this, 0x00);
+            Registers.Calib11.Define(this, 0x21);
+            Registers.Calib12.Define(this, 0x60);
+            Registers.Calib13.Define(this, 0x9E);
+            Registers.Calib14.Define(this, 0x75);
+            Registers.Calib15.Define(this, 0xF3);
+            Registers.Calib16.Define(this, 0xF6);
+            Registers.Calib17.Define(this, 0x78);
+            Registers.Calib18.Define(this, 0x40);
+            Registers.Calib19.Define(this, 0x13);
+            Registers.Calib20.Define(this, 0xC4);
         }
 
         private Registers registerAddress;
@@ -245,7 +267,29 @@ namespace Antmicro.Renode.Peripherals.CF2
             // 0x1E reserved
             Config = 0x1F, // Read-Write
             // 0x20 - 0x7D reserved
-            Cmd = 0x7E // Read-Write
+            Cmd = 0x7E, // Read-Write
+
+            Calib0 = 0x31,
+            Calib1 = 0x32,
+            Calib2 = 0x33,
+            Calib3 = 0x34,
+            Calib4 = 0x35,
+            Calib5 = 0x36,
+            Calib6 = 0x37,
+            Calib7 = 0x38,
+            Calib8 = 0x39,
+            Calib9 = 0x3A,
+            Calib10 = 0x3B,
+            Calib11 = 0x3C,
+            Calib12 = 0x3D,
+            Calib13 = 0x3E,
+            Calib14 = 0x3F,
+            Calib15 = 0x40,
+            Calib16 = 0x41,
+            Calib17 = 0x42,
+            Calib18 = 0x43,
+            Calib19 = 0x44,
+            Calib20 = 0x45
         }
     }
 }
