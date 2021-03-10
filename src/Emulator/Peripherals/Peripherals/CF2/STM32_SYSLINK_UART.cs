@@ -58,12 +58,13 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         private void SendBack()
         {
-            Byte[] data = receiveFifo.ToArray();
+            byte[] data = receiveFifo.ToArray();
             switch(data[2])
             {
                 case 0x20: // SYSLINK_OW_SCAN
-                    //foreach(Byte b in OwScanData) //:(
-                    for(int i = 0; i < 7; ++i)
+                    //byte[] messageData = {0x00};
+                    byte[] OwScanData = CreateMessage(0x20, 0x01, new byte[]{0x00});
+                    for(int i = 0; i < OwScanData.Length; ++i)
                     {
                         CharReceived?.Invoke((byte)OwScanData[i]);
                     }
@@ -80,7 +81,34 @@ namespace Antmicro.Renode.Peripherals.CF2
             this.Log(LogLevel.Noisy, "Complete data sent back!");
         }
 
-        private Byte[] OwScanData = {0xBC,0xCF,0x20,0x01,0x00,0x21,0x62};
+        //private byte[] OwScanData = {0xBC,0xCF,0x20,0x01,0x00,0x21,0x62};
+
+        public byte[] TestCreateMessage()
+        {
+            return CreateMessage(0xA0, 0x00, new byte[1]);
+        }
+
+        public byte[] CreateMessage(byte command, byte length, byte[] data)
+        {
+            byte[] result = new byte[length+6];
+            result[0] = 0xBC;
+            result[1] = 0xCF;
+            result[2] = command;
+            result[3] = length;
+            for(int i = 0; i < length; i++)
+            {
+                result[4+i] = data[i];
+            }
+            //result[length+4] = 0;
+            //result[length+5] = 0;
+            for(int i = 2; i < length+4; i++)
+            {
+                result[length+4] += result[i];
+                result[length+5] += result[length+4];
+            }
+
+            return result;
+        }
 
         public override void Reset()
         {
