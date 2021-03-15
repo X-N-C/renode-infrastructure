@@ -158,7 +158,6 @@ namespace Antmicro.Renode.UI
                 };
                 shell = ShellProvider.GenerateShell(monitor, true);
                 shell.Terminal = new NavigableTerminalEmulator(io, true);
-                Emulator.BeforeExit += shell.Stop;
             }
             else if(options.Port >= 0)
             {
