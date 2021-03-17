@@ -27,21 +27,9 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         public void WriteChar(byte value)
         {
-            /*if(!usartEnabled.Value && !receiverEnabled.Value)
-            {
-                this.Log(LogLevel.Warning, "Received a character, but the receiver is not enabled, dropping.");
-                return;
-            }*/
-            /*
-            receiveFifo.Enqueue(value);
-            readFifoNotEmpty.Value = true;
-            this.Log(LogLevel.Error, "Data received 0x{0:X}", value);
-            Update();
-            CharReceived?.Invoke((byte)value);
-            */
             // Read entire message
             // With the queue, read byte 2 (0-indexed) to find message type
-            // Handle appropriately when queue has DataLength+6 elements
+            // Sends back the correct message once the entire package has been received
             receiveFifo.Enqueue(value);
             if(receiveFifo.Count == 4)
             {
@@ -62,7 +50,6 @@ namespace Antmicro.Renode.Peripherals.CF2
             switch(data[2])
             {
                 case 0x20: // SYSLINK_OW_SCAN
-                    //byte[] messageData = {0x00};
                     byte[] OwScanData = CreateMessage(0x20, 0x01, new byte[]{0x00});
                     for(int i = 0; i < OwScanData.Length; ++i)
                     {
@@ -81,13 +68,7 @@ namespace Antmicro.Renode.Peripherals.CF2
             this.Log(LogLevel.Noisy, "Complete data sent back!");
         }
 
-        //private byte[] OwScanData = {0xBC,0xCF,0x20,0x01,0x00,0x21,0x62};
-
-        public byte[] TestCreateMessage()
-        {
-            return CreateMessage(0xA0, 0x00, new byte[1]);
-        }
-
+        // Creates the message to be sent back
         public byte[] CreateMessage(byte command, byte length, byte[] data)
         {
             byte[] result = new byte[length+6];
@@ -99,12 +80,10 @@ namespace Antmicro.Renode.Peripherals.CF2
             {
                 result[4+i] = data[i];
             }
-            //result[length+4] = 0;
-            //result[length+5] = 0;
             for(int i = 2; i < length+4; i++)
             {
-                result[length+4] += result[i];
-                result[length+5] += result[length+4];
+                result[length+4] += result[i]; // Checksum 1
+                result[length+5] += result[length+4]; // Checksum 2
             }
 
             return result;

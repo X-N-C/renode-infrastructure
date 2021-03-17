@@ -76,7 +76,6 @@ namespace Antmicro.Renode.Peripherals.CF2
                             return updateInterruptFlag;
                         },
                         name: "Update interrupt flag (UIF)")
-                    //.WithValueField(1, 31) //Silence...
                     .WithReservedBits(1,31)
                     .WithWriteCallback((_, __) => UpdateInterrupts())
                 },
@@ -95,7 +94,6 @@ namespace Antmicro.Renode.Peripherals.CF2
                         else if(Direction == Direction.Descending)
                         {
                             this.Log(LogLevel.Error, "Direction should only be ascending for the basic timer!");
-                            //Value = autoReloadValue;
                         }
                         if(!updateRequestSource.Value && updateInterruptEnable.Value)
                         {
@@ -186,25 +184,14 @@ namespace Antmicro.Renode.Peripherals.CF2
         {
             Control1 = 0x0,
             Control2 = 0x04,
-            //SlaveModeControl = 0x08,
+            // 0x08 reserved
             DmaOrInterruptEnable = 0x0C,
             Status = 0x10,
             EventGeneration = 0x14,
-            //CaptureOrCompareMode1 = 0x18,
-            //CaptureOrCompareMode2 = 0x1C,
-            //CaptureOrCompareEnable = 0x20,
+            // 0x18 - 0x20 reserved
             Counter = 0x24,
             Prescaler = 0x28,
             AutoReload = 0x2C,
-            // gap intended
-            //CaptureOrCompare1 = 0x34,
-            //CaptureOrCompare2 = 0x38,
-            //CaptureOrCompare3 = 0x3C,
-            //CaptureOrCompare4 = 0x40,
-            // gap intended
-            //DmaControl = 0x48,
-            //DmaAddressForFullTransfer = 0x4C,
-            //Option = 0x50
         }
     }
 }

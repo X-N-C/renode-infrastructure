@@ -51,7 +51,7 @@ namespace Antmicro.Renode.Peripherals.CF2
             // length=3 one byte of data
             // (n*2)+2 burst write with n bytes
 
-            // skip the first byte as it contains register address
+            // Skip the first byte as it contains register address
             // Must skip final byte, problem with I2C
 
             if(data.Length == 1)
@@ -76,7 +76,6 @@ namespace Antmicro.Renode.Peripherals.CF2
             }
         }
 
-        // Help function
         public byte ReadRegister(byte offset)
         {
             return RegistersCollection.Read(offset);
@@ -84,7 +83,6 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         public byte[] Read(int count)
         {
-            // Need a semaphore?
             if(registerAddress==Registers.Data0)
             {
                 fifoP.TryDequeueNewSample();
@@ -109,13 +107,7 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         public void TriggerDataInterrupt()
         {
-            if(true) //TODO fix, is data interrupt enabled?
-            {
-                Int1.Set(false);
-                Int1.Set(true);
-                Int1.Set(false);
-                this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 1!");
-            }
+           // TODO: TriggerDataInterrupt
         }
 
         public void FeedPTSample(decimal pressure, decimal temperature, int repeat = 1)
@@ -140,7 +132,7 @@ namespace Antmicro.Renode.Peripherals.CF2
         {
             Registers.ChipId.Define(this, 0x50); //RO
             Registers.ErrReg.Define(this, 0x00); //RO
-            Registers.Status.Define(this, 0x10); //RO NOTE wrong reset value, command decoder always ready in simulation?
+            Registers.Status.Define(this, 0x10); //RO HACK wrong reset value, command decoder always ready in simulation
             Registers.Data0.Define(this, 0x00)
                 .WithValueField(0, 8, FieldMode.Read, name: "Press_[7:0]", valueProviderCallback: _ => PtoByte(fifoP.Sample.Value, 0)); //RO
             Registers.Data1.Define(this, 0x00)
@@ -178,6 +170,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                     }
                 });
 
+            // Read from one real sensor
             Registers.Calib0.Define(this, 0xC5);
             Registers.Calib1.Define(this, 0x6A);
             Registers.Calib2.Define(this, 0xDD);
@@ -205,31 +198,18 @@ namespace Antmicro.Renode.Peripherals.CF2
         private readonly SensorSamplesFifo<ScalarSample> fifoP;
         private readonly SensorSamplesFifo<ScalarSample> fifoT;
 
-        // One bit: IFlagRegisterField
-        // Multiple: IValueRegisterField
-
         private const byte resetCommand = 0xB6;
-
-        // short←{⍵×16,384×2*Range}
-        //TODO CHECK IF IN VALID RANGE!
-
-        /*private byte mgToByte(decimal rawData, bool msb)
-        {
-            rawData = rawData * 32768 / ((decimal)(1000 * 1.5 * (2 << (short)accRange.Value)));
-            short converted = (short)(rawData > 6.MaxValue ? 6.MaxValue : rawData < 6.MinValue ? 6.MinValue : rawData);
-            return (byte)(converted >> (msb ? 8 : 0));
-        }*/
 
         private byte PtoByte(decimal rawData, byte shift)
         {
-            rawData = rawData; //FIXME
+            //FIXME add conversion
             int converted = (int)(rawData > 0xFFFFFF ? 0xFFFFFF : rawData);
             return (byte)(converted >> shift);
         }
 
         private byte TtoByte(decimal rawData, byte shift)
         {
-            rawData = rawData; //FIXME
+            //FIXME add conversion
             int converted = (int)(rawData > 0xFFFFFF ? 0xFFFFFF : rawData);
             return (byte)(converted >> shift);
         }

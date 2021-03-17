@@ -99,7 +99,6 @@ namespace Antmicro.Renode.Peripherals.I2C
         {
             var control1 = new DoubleWordRegister(this)
                 .WithFlag(15, writeCallback: SoftwareResetWrite, name:"SWRST")
-                //.WithFlag(11, name:"POS", writeCallback: SetPOS) //Added from issue 114 (Not used in our case?)
                 .WithFlag(9, FieldMode.Read, name:"StopGen", writeCallback: StopWrite)
                 .WithFlag(8, FieldMode.Read, writeCallback: StartWrite, name:"StartGen")
                 .WithFlag(0, writeCallback: PeripheralEnableWrite, name:"PeriEn");
@@ -226,15 +225,15 @@ namespace Antmicro.Renode.Peripherals.I2C
                 machine.LocalTimeSource.ExecuteInNearestSyncedState(_ =>
                 {
                     dataRegisterEmpty.Value = true;
-                    //byteTransferFinished.Value = true;
                     Update();
                     writeLock = false;
                     machine.LocalTimeSource.ExecuteInNearestSyncedState(__ =>
                     {
                      if(!writeLock)
                      {
-                     //this.Log(LogLevel.Noisy, "Got byte 0x{0:X}. About to set BTF from {3} to true, with TxE={1} and ITBUFEN={2}.", newValue, dataRegisterEmpty.Value, bufferInterruptEnable.Value, byteTransferFinished.Value);
                          this.Log(LogLevel.Noisy, "Setting BTF to true!");
+                         // Moved setting BTF to inside another "Synced State" since it got set too soon otherwise
+                         // Firmware, hardware or emulation problem?
                          byteTransferFinished.Value = true;
                          Update();
                      }
@@ -277,7 +276,6 @@ namespace Antmicro.Renode.Peripherals.I2C
             state = State.Idle;
             byteTransferFinished.Value = false;
             dataRegisterEmpty.Value = false;
-            //transmitterReceiver.Value = false;
             dataToReceive.Clear();
             Update();
         }
@@ -296,12 +294,10 @@ namespace Antmicro.Renode.Peripherals.I2C
                 this.NoisyLog("Repeated start condition. In StartWrite, dataToTransfer has {0} elements", dataToTransfer.Count);
                 selectedSlave.Write(dataToTransfer.ToArray());
                 dataToTransfer.Clear();
-                //transmitterReceiver.Value = false;
             }
             //TODO: TRA cleared on repeated Start condition. Is this always here?
             transmitterReceiver.Value = false;
             dataRegisterEmpty.Value = false;
-            //dataRegisterEmpty.Value = !is2ByteMode; // Added from issue 114 (Not used.)
             byteTransferFinished.Value = false;
             startBit.Value = true;
             if(newValue)
@@ -317,28 +313,6 @@ namespace Antmicro.Renode.Peripherals.I2C
                 }
             }
         }
-
-        // Added from issue #114
-        /*private bool is2ByteMode;
-        private void SetPOS(bool oldValue, bool newValue)
-        {
-            // for 2-byte reception
-            if(newValue)
-            {
-                is2ByteMode = true;
-                //this.Log(LogLevel.Debug, "Now in 2-byte reception mode");
-                if(dataRegisterNotEmpty.Value && dataToReceive.Any())
-                {
-                    byteTransferFinished.Value = true;
-                    //this.Log(LogLevel.Debug, "Waiting for Data Read");
-                }
-            }
-            else
-            {
-                is2ByteMode = false;
-                //this.Log(LogLevel.Debug, "2-byte reception mode off");
-            }
-        }*/
 
         private void PeripheralEnableWrite(bool oldValue, bool newValue)
         {
