@@ -13,12 +13,12 @@ using Antmicro.Migrant;
 using Antmicro.Renode.Core.Structure.Registers;
 using Antmicro.Renode.Peripherals.UART;
 
-namespace Antmicro.Renode.Peripherals.CF2
+namespace Antmicro.Renode.Peripherals.Miscellaneous
 {
     [AllowedTranslations(AllowedTranslation.WordToDoubleWord | AllowedTranslation.ByteToDoubleWord)]
-    public class STM32_SYSLINK_UART : BasicDoubleWordPeripheral, IUART
+    public class CF_Syslink : BasicDoubleWordPeripheral, IUART
     {
-        public STM32_SYSLINK_UART(Machine machine, uint frequency = 8000000) : base(machine)
+        public CF_Syslink(Machine machine, uint frequency = 8000000) : base(machine)
         {
             this.frequency = frequency;
             this.DataLength = UInt32.MaxValue - 6; // Packet lengths have data and 6 extra bytes

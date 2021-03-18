@@ -11,9 +11,8 @@ using Antmicro.Renode.Core.Structure.Registers;
 using Antmicro.Renode.Peripherals.Bus;
 using Antmicro.Renode.Time;
 using Antmicro.Renode.Logging;
-using Antmicro.Renode.Peripherals.Timers;
 
-namespace Antmicro.Renode.Peripherals.CF2
+namespace Antmicro.Renode.Peripherals.Timers
 {
     // This class does not implement advanced-control timers interrupts
     [AllowedTranslations(AllowedTranslation.ByteToDoubleWord | AllowedTranslation.WordToDoubleWord)]
