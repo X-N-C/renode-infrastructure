@@ -12,7 +12,7 @@ using Antmicro.Renode.Logging;
 using Antmicro.Renode.Peripherals.I2C;
 using Antmicro.Renode.Utilities;
 
-namespace Antmicro.Renode.Peripherals.CF2
+namespace Antmicro.Renode.Peripherals.Miscellaneous
 {
     public class EEPROM_24AA64 : II2CPeripheral
     {
