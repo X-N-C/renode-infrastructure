@@ -21,7 +21,7 @@ namespace Antmicro.Renode.Peripherals.CF2
         public STM32_SYSLINK_UART(Machine machine, uint frequency = 8000000) : base(machine)
         {
             this.frequency = frequency;
-            DefineRegisters();
+            //DefineRegisters();
             this.DataLength = UInt32.MaxValue - 6; // Packet lengths have data and 6 extra bytes
         }
 
@@ -95,8 +95,8 @@ namespace Antmicro.Renode.Peripherals.CF2
             receiveFifo.Clear();
         }
 
-        public uint BaudRate
-        {
+        public uint BaudRate { get; }
+        /*{
             get
             {
                 //OversamplingMode.By8 means we ignore the oldest bit of dividerFraction.Value
@@ -105,10 +105,10 @@ namespace Antmicro.Renode.Peripherals.CF2
                 var divisor = 8 * (2 - (int)oversamplingMode.Value) * (dividerMantissa.Value + fraction / 16.0);
                 return divisor == 0 ? 0 : (uint)(frequency / divisor);
             }
-        }
+        }/*
 
-        public Bits StopBits
-        {
+        public Bits StopBits { get; }
+        /*{
             get
             {
                 switch(stopBits.Value)
@@ -125,19 +125,19 @@ namespace Antmicro.Renode.Peripherals.CF2
                     throw new ArgumentException("Invalid stop bits value");
                 }
             }
-        }
+        }/*
 
-        public Parity ParityBit => parityControlEnabled.Value ?
+        public Parity ParityBit { get; }/*=> parityControlEnabled.Value ?
                                     (paritySelection.Value == ParitySelection.Even ?
                                         Parity.Even :
                                         Parity.Odd) :
-                                    Parity.None;
+                                    Parity.None;*/
 
-        public GPIO IRQ { get; } = new GPIO();
+        /*public GPIO IRQ { get; } = new GPIO();*/
 
         public event Action<byte> CharReceived;
 
-        private void DefineRegisters()
+        /*private void DefineRegisters()
         {
             Register.Status.Define(this, 0xC0, "USART_SR")
                 .WithTaggedFlag("PE", 0)
@@ -214,20 +214,20 @@ namespace Antmicro.Renode.Peripherals.CF2
                 .WithTaggedFlag("LINEN", 14)
                 .WithReservedBits(15, 17)
             ;
-        }
+        }*/
 
         private void Update()
-        {
+        {/*
             IRQ.Set(
                 (receiverNotEmptyInterruptEnabled.Value && readFifoNotEmpty.Value) ||
                 (transmitDataRegisterEmptyInterruptEnabled.Value) || // TXE is assumed to be true
                 (transmissionCompleteInterruptEnabled.Value && transmissionComplete.Value)
-            );
+            );*/
         }
 
         private readonly uint frequency;
 
-        private IEnumRegisterField<OversamplingMode> oversamplingMode;
+        /*private IEnumRegisterField<OversamplingMode> oversamplingMode;
         private IEnumRegisterField<StopBitsValues> stopBits;
         private IFlagRegisterField usartEnabled;
         private IFlagRegisterField parityControlEnabled;
@@ -240,11 +240,11 @@ namespace Antmicro.Renode.Peripherals.CF2
         private IFlagRegisterField readFifoNotEmpty;
         private IFlagRegisterField transmissionComplete;
         private IValueRegisterField dividerMantissa;
-        private IValueRegisterField dividerFraction;
+        private IValueRegisterField dividerFraction;*/
 
         private readonly Queue<byte> receiveFifo = new Queue<byte>();
 
-        private enum OversamplingMode
+        /*private enum OversamplingMode
         {
             By16 = 0,
             By8 = 1
@@ -273,6 +273,6 @@ namespace Antmicro.Renode.Peripherals.CF2
             Control2 = 0x10,
             Control3 = 0x14,
             GuardTimeAndPrescaler = 0x18
-        }
+        }*/
     }
 }
