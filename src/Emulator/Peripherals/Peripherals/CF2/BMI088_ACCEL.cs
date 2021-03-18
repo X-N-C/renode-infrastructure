@@ -50,7 +50,7 @@ namespace Antmicro.Renode.Peripherals.CF2
 
             if(data.Length > 1)
             {
-                // skip the first byte as it contains register address
+                // Skip the first byte as it contains register address
                 // Must skip final byte, problem with I2C
                 for(var i = 1; i < data.Length - 1; i++)
                 {
@@ -65,7 +65,6 @@ namespace Antmicro.Renode.Peripherals.CF2
             }
         }
 
-        // Help function
         public byte ReadRegister(byte offset)
         {
             return RegistersCollection.Read(offset);
@@ -73,13 +72,12 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         public byte[] Read(int count)
         {
-            // Need a semaphore?
             if(registerAddress==Registers.AccXLSB)
             {
                 fifo.TryDequeueNewSample();
             }
-            //if registerAddress = 0x02 (xLSB) return 6 bytes (x,y,z)
-            //else return 1 byte i.e. the register
+            // If registerAddress = 0x02 (xLSB) return 6 bytes (x,y,z)
+            // else return 1 byte i.e. the register
             var result = new byte[registerAddress==Registers.AccXLSB?6:1];
             for(var i = 0; i < result.Length; i++)
             {
@@ -97,26 +95,10 @@ namespace Antmicro.Renode.Peripherals.CF2
         public GPIO Int1 { get; }
         public GPIO Int2 { get; }
 
-        /*public void TriggerDataInterrupt()
+        public void TriggerDataInterrupt()
         {
-            if(dataEn.Value)
-            {
-                if(int3Data.Value)
-                {
-                    Int1.Set(false);
-                    Int1.Set(true);
-                    Int1.Set(false);
-                    this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 1!");
-                }
-                if(int4Data.Value)
-                {
-                    Int2.Set(false);
-                    Int2.Set(true);
-                    Int2.Set(false);
-                    this.Log(LogLevel.Noisy, "Data interrupt triggered on pin 2!");
-                }
-            }
-        }*/
+           // TODO: TriggerDataInterrupt
+        }
 
         public void FeedAccSample(decimal x, decimal y, decimal z, int repeat = 1)
         {
@@ -154,7 +136,6 @@ namespace Antmicro.Renode.Peripherals.CF2
             Registers.AccRange.Define(this, 0x01)
                 .WithValueField(0, 2, out accRange, name: "acc_range")
                 .WithReservedBits(2, 6); //RW
-
             Registers.AccPwrConf.Define(this, 0x03)
                 .WithValueField(0, 8, name: "pwr_save_mode"); //RW
             Registers.AccPwrCtrl.Define(this, 0x00)
@@ -167,23 +148,12 @@ namespace Antmicro.Renode.Peripherals.CF2
                         Reset();
                     }
                 });
-
         }
 
         private Registers registerAddress;
         private readonly SensorSamplesFifo<Vector3DSample> fifo;
 
-        // One bit: IFlagRegisterField
-        // Multiple: IValueRegisterField
-
         private IValueRegisterField accRange;
-
-        /*private IFlagRegisterField dataEn;
-        private IFlagRegisterField fifoEn;
-        private IFlagRegisterField int3Data;
-        private IFlagRegisterField int3Fifo;
-        private IFlagRegisterField int4Fifo;
-        private IFlagRegisterField int4Data;*/
 
         private const byte resetCommand = 0xB6;
 

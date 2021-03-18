@@ -29,7 +29,10 @@ namespace Antmicro.Renode.Peripherals.CF2
             DefineRegisters();
         }
 
-        public event Action<byte> CharReceived;
+        //HACK To make communication with an external program easy, implements the IUART interface
+        #pragma warning disable 0067
+            public event Action<byte> CharReceived;
+        #pragma warning restore 0067
         public void WriteChar(byte value)
         {
             TriggerDataInterrupt();
@@ -61,7 +64,7 @@ namespace Antmicro.Renode.Peripherals.CF2
 
             if(data.Length > 1)
             {
-                // skip the first byte as it contains register address
+                // Skip the first byte as it contains register address
                 // Must skip final byte, problem with I2C
                 for(var i = 1; i < data.Length - 1; i++)
                 {
@@ -76,7 +79,6 @@ namespace Antmicro.Renode.Peripherals.CF2
             }
         }
 
-        // Help function
         public byte ReadRegister(byte offset)
         {
             return RegistersCollection.Read(offset);
@@ -84,13 +86,12 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         public byte[] Read(int count)
         {
-            // Need a semaphore?
             if(registerAddress==Registers.RateXLSB)
             {
                 fifo.TryDequeueNewSample();
             }
-            //if registerAddress = 0x02 (xLSB) return 6 bytes (x,y,z)
-            //else return 1 byte i.e. the register
+            // If registerAddress = 0x02 (xLSB) return 6 bytes (x,y,z)
+            // else return 1 byte i.e. the register
             var result = new byte[registerAddress==Registers.RateXLSB?6:1];
             for(var i = 0; i < result.Length; i++)
             {
@@ -164,7 +165,7 @@ namespace Antmicro.Renode.Peripherals.CF2
                 .WithFlag(4, name: "fifo_int")
                 .WithReservedBits(5, 2)
                 .WithFlag(7, name: "gyro_drdy"); //RO
-            // FIFOSTATUS?
+
             Registers.GyroRange.Define(this, 0x00)
                 .WithValueField(0, 8, out gyroRange, name: "gyro_range"); //RW
             Registers.GyroBandwidth.Define(this, 0x80)
@@ -196,14 +197,11 @@ namespace Antmicro.Renode.Peripherals.CF2
                 .WithFlag(5, out int4Fifo, name: "int4_fifo")
                 .WithReservedBits(6, 1)
                 .WithFlag(7, out int4Data, name: "int4_data");
-            Registers.GyroSelfTest.Define(this, 0x12); // Hack: Reset value is value to be read on succesful self test
+            Registers.GyroSelfTest.Define(this, 0x12); // HACK: Reset value is value to be read on succesful self test and not actual reset value.
         }
 
         private Registers registerAddress;
         private readonly SensorSamplesFifo<Vector3DSample> fifo;
-
-        // One bit: IFlagRegisterField
-        // Multiple: IValueRegisterField
 
         private IValueRegisterField gyroRange;
 
@@ -216,8 +214,6 @@ namespace Antmicro.Renode.Peripherals.CF2
 
         private const byte resetCommand = 0xB6;
 
-        // short←{⍵×16,384×2*Range}
-        //TODO CHECK IF IN VALID RANGE!
         private byte DPStoByte(decimal rawData, bool msb)
         {
             rawData = rawData*(decimal)16.384*(1<<(short)gyroRange.Value);
