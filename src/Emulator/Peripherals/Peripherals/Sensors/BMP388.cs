@@ -8,14 +8,13 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Antmicro.Renode.Peripherals.Sensor;
-using Antmicro.Renode.Peripherals.Sensors;
 using Antmicro.Renode.Peripherals.I2C;
 using Antmicro.Renode.Logging;
 using Antmicro.Renode.Core;
 using Antmicro.Renode.Core.Structure.Registers;
 using Antmicro.Renode.Utilities;
 
-namespace Antmicro.Renode.Peripherals.CF2
+namespace Antmicro.Renode.Peripherals.Sensors
 {
     public class BMP388 : II2CPeripheral, IProvidesRegisterCollection<ByteRegisterCollection>, ISensor
     {
