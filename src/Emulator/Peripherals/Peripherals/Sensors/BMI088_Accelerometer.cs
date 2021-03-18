@@ -8,7 +8,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Antmicro.Renode.Peripherals.Sensor;
-//using Antmicro.Renode.Peripherals.Sensors;
 using Antmicro.Renode.Peripherals.I2C;
 using Antmicro.Renode.Logging;
 using Antmicro.Renode.Core;

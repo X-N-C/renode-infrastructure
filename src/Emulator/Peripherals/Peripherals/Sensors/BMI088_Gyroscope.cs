@@ -8,7 +8,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Antmicro.Renode.Peripherals.Sensor;
-using Antmicro.Renode.Peripherals.Sensors;
 using Antmicro.Renode.Peripherals.I2C;
 using Antmicro.Renode.Logging;
 using Antmicro.Renode.Core;
@@ -16,11 +15,11 @@ using Antmicro.Renode.Core.Structure.Registers;
 using Antmicro.Renode.Utilities;
 using Antmicro.Renode.Peripherals.UART;
 
-namespace Antmicro.Renode.Peripherals.CF2
+namespace Antmicro.Renode.Peripherals.Sensors
 {
-    public class BMI088_GYRO : II2CPeripheral, IProvidesRegisterCollection<ByteRegisterCollection>, ISensor, IUART
+    public class BMI088_Gyroscope : II2CPeripheral, IProvidesRegisterCollection<ByteRegisterCollection>, ISensor, IUART
     {
-        public BMI088_GYRO()
+        public BMI088_Gyroscope()
         {
             fifo = new SensorSamplesFifo<Vector3DSample>();
             RegistersCollection = new ByteRegisterCollection(this);
