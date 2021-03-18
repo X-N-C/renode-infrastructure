@@ -8,18 +8,18 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Antmicro.Renode.Peripherals.Sensor;
-using Antmicro.Renode.Peripherals.Sensors;
+//using Antmicro.Renode.Peripherals.Sensors;
 using Antmicro.Renode.Peripherals.I2C;
 using Antmicro.Renode.Logging;
 using Antmicro.Renode.Core;
 using Antmicro.Renode.Core.Structure.Registers;
 using Antmicro.Renode.Utilities;
 
-namespace Antmicro.Renode.Peripherals.CF2
+namespace Antmicro.Renode.Peripherals.Sensors
 {
-    public class BMI088_ACCEL : II2CPeripheral, IProvidesRegisterCollection<ByteRegisterCollection>, ISensor
+    public class BMI088_Accelerometer : II2CPeripheral, IProvidesRegisterCollection<ByteRegisterCollection>, ISensor
     {
-        public BMI088_ACCEL()
+        public BMI088_Accelerometer()
         {
             fifo = new SensorSamplesFifo<Vector3DSample>();
             RegistersCollection = new ByteRegisterCollection(this);
